@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <title>Lesson 4</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------ PocketORC: CSS ----------------->
+    <link rel="stylesheet" href="./css/pocketTHERM.css" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <!--------------- BDN boxicon link: --------------->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script src="./js/pocketTHERM.js"></script>
+</head>
+    
+<body>
+    <py-config>
+        packages = ["numpy", "matplotlib","pandas"]
+        
+        [[fetch]]
+        files = ["lesson4.py"]
+        from = 'python_html'
+        
+        [[fetch]]
+        files = ["thermo_props.py","orc_simulator.py"]
+        from = 'python_modules'        
+        
+        [[fetch]]
+        files = ["n-pentane.csv"]
+        from = 'fluids'
+        
+    </py-config>
+
+<!-------------------------- Begin: Sidebar ---------------------------->
+    <div class="sidebar">
+        <div class="logo-details">
+            <i class='bx bxl-pocket' ></i>
+            <span class="logo-name">pocketTHERM</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="./">
+                    <i class='bx bxs-home'></i>
+                    <span class="link-name">Home</span>
+                </a>
+                <ul class="sub-menu blank">
+                    <li><a href="#" class="link-name">Homepage</a></li>
+                </ul>
+            </li>
+
+            <!------------------------ Calculators: ------------------------>
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bx-math' ></i>
+                        <span class="link-name">Calculators</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">Calculators</a></li>
+                    <li><a href="./pocketORC.html">pocketORC</a><li>
+                    <li><a href="./pocketHP.html">pocketHP</a></li>
+                </ul>
+            </li>     
+
+            <!-------------------------- Lessons: -------------------------->
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bxs-book-content'></i>
+                        <span class="link-name">ORC lessons</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">ORC lessons</a></li>
+                    <li><a href="./lesson1.html">1. Saturated states</a></li>
+                    <li><a href="./lesson2.html">2. Single-phase states</a></li>
+                    <li><a href="./lesson3.html">3. Ideal and real cycles</a></li>
+                    <li><a href="./lesson4.html">4. Recuperation</a></li>
+                    <li><a href="./lesson5.html">5. Heat source and sink</a></li>
+                    <li><a href="./lesson6.html">6. Alternative cycles</a></li>
+                </ul>
+            </li>  
+        </ul>
+        <div class="profile-details">
+            <div class="profile-content"></div>
+            <div class="name-job">
+                <div class="profile-name">Dr. Martin T. White</div>
+            </div>
+            <a href="https://www.linkedin.com/in/martin-t-white"><i class='bx bxl-linkedin-square'></i></a>
+        </div>   
+    </div> 
+    <!--------------------------- END of sidebar: ---------------------------->
+
+    <!--------------------------- Homepage Content: -------------------------->
+    <section class="home-section">
+        <div class="home-content">
+            <i class="bx bx-menu"></i>
+            <h1>Lesson 4: Recuperation</h1>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+        <div class="introduction">
+            <h2>Introduction</h2>
+            <p>&nbsp</p>
+ 
+            <p>In this lesson we introduce our first variation to our simple ORC system, and with it our fifth cycle variable, namely the recuperator effectiveness. As always, the aim of this lesson is to introduce the idea qualitatively, and discuss it within the context of pocketORC. For more details on the mathematical calculation, please refer to the supporting documentation.</p>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+        <div class="body-contents">
+            <h2>What is a recuperator?</h2>
+            <p>&nbsp</p>
+            <p>In our basic ORC power system it is not uncommon for the superheated vapour at the outlet of our expander to have a large degree of superheat (i.e., the temperature of the vapour is significantly higher than the condensation temperature). Moreover, the temperature rise in our pump is generally negligible and therefore the temperature of the liquid at the outlet of our pump is close to the condensation temperature. Subsequently, this presents an opportunity to recycle heat within our cycle and improve the thermodynamic cycle efficiency.</p><p>&nbsp</p>
+            <p>This is done with the installation of a heat exchanger, referred to as a recuperator, that is installed to exchange heat between the hot vapour leaving the expander, and the cold liquid leaving the pump. During this heat exchange process, the hot vapour is cooled down, and the cold liquid is heated up.</p>
+            <p>&nbsp</p>
+            <p>This is beneficial because the temperature of the liquid entering the evaporator is now increased, which means that less heat is now required from the heat source. Subsequently, for the same compression and expansion processes (i,e., the same pump and expander work), the required heat input has reduced and the cycle efficiency increases.</p>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+
+        <p>&nbsp</p>
+        <div class="body-contents">
+            <h2>Recuperator effectiveness</h2>
+            <p>&nbsp</p>
+            <p>To model the recuperator, we introduce our fifth cycle variable which is the <em>recuperator effectiveness</em>. This parameter is defined as the ratio of the internal heat recovered by the recuperator to the maximum heat that could theoretically be recovered.</p><p>&nbsp</p>
+            <p>When the recuperator effectiveness is set to zero, then no recuperation takes place and the cycle is essentially the basic ORC system we have seen in our earlier lessons.</p><p>&nbsp</p>
+            <p>When the recuperator effectiveness is set to 100%, then the maximum amount of heat recuperation takes place, which generally corresponds to cooling the hot vapour leaving the expander right down to the condensation temperature. However, this is rarely achieved in practice, as it would imply infinitely large heat exchangers.</p><p>&nbsp</p>
+            <p>Try out different values for the recuperator effectiveness below, and observe how it affects the cycle efficiency. The temperature profiles of the two fluids exchanging heat are also observed in the right hand plot.</p><p>&nbsp</p>
+
+
+            <label for="inpt-recup-eff">Recuperator effectiveness:</label>
+            <div class="tooltip">
+                <input name="inpt-recup-eff" id="inpt-recup-eff" type="range" min="0" max="100" value="50" oninput="updateTooltip(this, 0)"/>
+                <span class="tooltiptext">50</span>
+            </div>
+
+            <p>&nbsp</p>
+            <button id="btn-recup-eff" class="btn">Calculate</button>
+            <p>&nbsp</p>
+
+            <div id="plt-recup-eff"> </div>
+            
+        </div>
+        <p>&nbsp</p>
+
+        <!--------------------------- Footer: --------------------------->
+        <hr><p>&nbsp</p>
+         <footer> <small>&copy; Copyright 2023, Martin T. White</small><p>&nbsp</p>
+            <small>The contribution of Piyathida Suwannakat through her summer internship funded by the Royal Academy of Engineering is also gratefully acknowledged. <a href="https://raeng.org.uk/news/academy-leverages-its-unrivalled-networks-to-secure-internships-for-eight-engineering-undergraduates">Click here for more details</a></small><p>&nbsp</p></footer>
+        
+    </section>
+
+    <!------------------------ Functionality: sidebar ----------------------->
+    <script>
+        let arrow = document.querySelectorAll(".arrow");
+        for (var i = 0; i < arrow.length; i++) {
+            arrow[i].addEventListener("click", (e)=>{
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+            });
+        }
+
+        let sidebar = document.querySelector(".sidebar");
+        let sidebarMenu = document.querySelector(".bx-menu");
+        
+        sidebarMenu.addEventListener("click", ()=>{
+            sidebar.classList.toggle("close");
+        });
+    </script>
+    <!---------------------------- End of JS: ------------------------------->
+
+    
+    <py-script src="./python_html/lesson4.py"></py-script>
+
+</body>
+    
+</html>

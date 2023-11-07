@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    
+<head>
+    <title>pocketHP</title>     
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------ Heat-pump: CSS ----------------->
+    <link rel="stylesheet" href="./css/pocketTHERM.css" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <!--------------- BDN boxicon link: --------------->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script src="./js/pocketTHERM.js"></script>
+</head>
+    
+<body>
+    <py-config>
+        packages = ["numpy", "matplotlib","pandas"]
+        
+        [[fetch]]
+        files = ["pocketHP.py"]
+        from = 'python_html'
+        
+        [[fetch]]
+        files = ["thermo_props.py","hp_simulator.py"]
+        from = 'python_modules'        
+        
+        [[fetch]]
+        files = ["n-pentane.csv","MM.csv", "R1233zd(E).csv"]
+        from = 'fluids'
+        
+    </py-config>
+    
+    <!-------------------------- Begin: Sidebar ---------------------------->
+    <div class="sidebar">
+        <div class="logo-details">
+            <i class='bx bxl-pocket' ></i>
+            <span class="logo-name">pocketTHERM</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="./">
+                    <i class='bx bxs-home'></i>
+                    <span class="link-name">Home</span>
+                </a>
+                <ul class="sub-menu blank">
+                    <li><a href="#" class="link-name">Homepage</a></li>
+                </ul>
+            </li>
+
+            <!------------------------ Calculators: ------------------------>
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bx-math' ></i>
+                        <span class="link-name">Calculators</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">Calculators</a></li>
+                    <li><a href="./pocketORC.html">pocketORC</a><li>
+                    <li><a href="./pocketHP.html">pocketHP</a></li>
+                </ul>
+            </li>     
+
+            <!-------------------------- Lessons: -------------------------->
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bxs-book-content'></i>
+                        <span class="link-name">ORC lessons</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">ORC lessons</a></li>
+                    <li><a href="./lesson1.html">1. Saturated states</a></li>
+                    <li><a href="./lesson2.html">2. Single-phase states</a></li>
+                    <li><a href="./lesson3.html">3. Ideal and real cycles</a></li>
+                    <li><a href="./lesson4.html">4. Recuperation</a></li>
+                    <li><a href="./lesson5.html">5. Heat source and sink</a></li>
+                    <li><a href="./lesson6.html">6. Alternative cycles</a></li>
+                </ul>
+            </li>  
+        </ul>
+        <div class="profile-details">
+            <div class="profile-content"></div>
+            <div class="name-job">
+                <div class="profile-name">Dr. Martin T. White</div>
+            </div>
+            <a href="https://www.linkedin.com/in/martin-t-white"><i class='bx bxl-linkedin-square'></i></a>
+        </div>   
+    </div> 
+    <!--------------------------- END of sidebar: ---------------------------->
+
+    <!--------------------------- Homepage Content: -------------------------->
+    <section class="home-section">
+        <div class="home-content">
+            <i class="bx bx-menu"></i>
+            <h1>pocketHP: Heat-pump design model</h1>
+        </div>
+        <hr><p>&nbsp</p>
+        
+        <div class="introduction">
+            <p style="color:rgb(48,76,35); font-size:16px; font-weight:bold;">pocketHP is still under development. Please proceed with caution.</p>
+            <p>&nbsp</p>
+            <h2>Introduction</h2>
+            <p>&nbsp</p>
+            <p>pocketHP is a steady-state design model for heat pump systems that operates straight from the browser (and hence from the phone in your pocket). The underlying model is written in the Python programming language and the PyScript framework is used to call Python code directly from HTML.</p>
+            <p>&nbsp</p>
+            <p>pocketHP is intended to be used as a teaching aid to explore basic principles relating to heat pump systems, whilst also serving as a pocket calculator for people working within the heat pump field. The current version combines the Peng-Robinson equation of state with a thermodynamic model of a heat pump system with an internal heat exchanger, and discretised heat exchanger sizing models. The user can vary cycle variables via the web form which returns performance data. The model enables single-point calculation, or parametric studies of a single variable. </p>
+            <p>&nbsp</p>
+            <p>The pocketHP page is still under development and lessons and documentation are not yet available. However, the pocketORC lessons and documentation should help give some insight to the underlying mechanics of the calculator.</p>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2> Operating principle of a heat pump</h2>
+            <p>&nbsp</p>
+            <p>A simple heat pump system is based on four thermodynamic processes, each of which is carried out by a specific piece of equipment. The cycle is also a closed loop in that after carrying out the four process sequentially the properties of the circulating working fluid return to the original conditions. A schematic of this cycle is shown in the figure below. </p>
+            <p>&nbsp</p>
+            <p>We start our cycle at the inlet to the compressor, referenced as station 1, where the working fluid starts in a cold, vapour state at low pressure. The job of the compressor is to increase the pressure of the vapour to a higher pressure, which is achieved via the addition of work using a motor. In turn, this also raises the temperature of the working fluid. </p>
+            <p>&nbsp</p>
+            <p>After the compressor, referenced as station 2, the high-pressure vapour then enters the condenser during which the working fluid rejects heat to the heat sink. The heat transferred to the heat source can then be used for the desired heating application. Within the condenser, the working fluid is cooled down, condensed and potentially subcooled. Thus, at the outlet of the condenser the fluid is in a high-pressure liquid state.</p>
+            <p>&nbsp</p>
+            <p>This liquid then moves to the expansion valve inlet, referenced as station 3, where the fluid is expanded. During this process, the pressure of the working fluid is reduced. The temperature of the working fluid is also reduced, and the expansion process results in a cold two-phase mixture (i.e., liquid and vapour) leaving the expansion valve. During the expansion process, no work is done and therefore the enthalpy of the working fluid remains constant.</p>
+            <p>&nbsp</p>
+            <p>The working fluid leaving the expansion valve, referenced as station 4, is at low pressure but and in a two-phase state. The final process is to evaporate working fluid using an evaporator. This returns to the working fluid back to its initial state. During this process, heat is absorbed from the available heat source and transferred into the cycle.</p>
+            <p>&nbsp</p>
+            <p>The performance of a simple heat pump system can be improved with the addition of an internal heat exchanger. The job of this component is to use the heat contained within the working fluid after the condenser in order to heat up the vapour entering the compressor. This cycle is also reported in the figure below.</p>
+            <p>&nbsp</p>
+            <p>&nbsp</p>
+
+            <img src="./assets/pocketHP_schematics.png" alt="prof" style="zoom" class="image" style="width:90%"><p>&nbsp</p>
+            <span>Schematics of a simple HP system (left) and recuperated HP system (right)</span>
+            
+        </div>
+        <hr>
+        <p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Fixed parameters</h2>
+            <p>&nbsp</p>
+ <p>The general goal for a heat pump designer is to design the system for a particular application. This generally corresponds to a known heat source and target heat sink. The calculator assumes both the heat source and heat sink are defined as sensible fluid streams with a finite mass-flow rate and constant specific-heat capacity. Enter those details below.</p><p>&nbsp</p>
+            <div class="calc-begin">
+                <!-------------- Heat-source: ---------------->
+                <div class="heat-source">
+                    <h3><b>Heat-source conditions:</b></h3>
+                    <p>&nbsp</p>
+                    <label for="heat-source-temperature">Inlet temperature [K]:</label>
+                    <div class="fixed">
+                        <input name="heat-source-temperature" id="heat-source-temperature" type="text" min="273" max="473" required="required" value=323>
+                        <span class="comment">Please select a value between 273 and 473</span>
+                    </div>
+ 
+                    <label for="heat-source-mass-flow">Mass-flow rate [kg/s]:</label>
+                    <div class="fixed">
+                        <input name="heat-source-mass-flow" id="heat-source-mass-flow" type="text" min="0" max="1000" required value=1> 
+                        <span class="comment">Please select a value between 0 and 1000</span>
+                    </div>
+
+                    <label for="heat-source-heat-capacity">Specific-heat capacity [J/(kg K)]:</label>
+                    <div class="fixed">
+                        <input name="heat-source-heat-capacity" id="heat-source-heat-capacity" type="text" min="0" max="10000" required value=1000>
+                        <span class="comment">Please select a value between 0 and 10000</span>
+                    </div>    
+                </div>
+                <p>&nbsp</p>
+
+                <!-------------- Heat-sink: ---------------->
+                <div class="heat-sink">
+                    <h3><b>Heat-sink conditions:</b></h3>
+                    <p>&nbsp</p>
+                    <div class="form-group">
+                        <label for="heat-sink-temperature">Inlet temperature [K]:</label>
+                        <div class="fixed">
+                            <input name="heat-sink-temperature" id="heat-sink-temperature" type="text" min="273" max="573" required value=373>
+                            <span class="comment">Please select a value between 273 and 573</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="heat-sink-mass-flow">Mass-flow rate [kg/s]:</label>
+                        <div class="fixed">
+                            <input name="heat-sink-mass-flow" id="heat-sink-mass-flow" type="text" min="0" max="1000" required value=1>
+                            <span class="comment">Please select a value between 0 and 1000</span>
+                         </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="heat-sink-heat-capacity">Specific-heat capacity [J/(kg K)]:</label>
+                        <div class="fixed">
+                            <input name="heat-sink-heat-capacity" id="heat-sink-heat-capacity" type="text" min="0" max="10000" required value=1000>
+                            <span class="comment">Please select a value between 0 and 10000</span>
+                        </div>
+                    </div>
+                </div>
+                <p>&nbsp</p>
+
+                <!-------- Component efficiencies: --------->
+                <div class="comp-eff">
+                    <h3><b>Component efficiencies:</b></h3>
+                    <p>&nbsp</p>
+                    <p>As a first assumption it is generally acceptable to assume that key system components, namely the compressor, operate with a fixed isentropic efficiency. Enter an assumption for that below.</p>
+                    <p>&nbsp</p>
+
+                    <div class="form-group">
+                        <label for="compressor-efficiency">Compressor efficiency [%]:</label>
+                        <div class="fixed">
+                            <input name="compressor-efficiency" id="compressor-efficiency" type="text" min="0" max="100" required value=70>
+                            <span class="comment">Please select a value between 0 and 100</span>
+                        </div>
+                    </div>
+                </div> 
+                <p>&nbsp</p>
+            </div>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="body-contents">
+  
+            <h2>Cycles variables</h2>
+            <p>&nbsp</p>
+            <p>To optimise the performance of the heat pump system, the heat pump designer has a number of different levers to pull. This includes changing the working fluid (i.e., the fluid circulating within the system), alongside a number of different thermodynamic variables. You can select the working fluid, and provide values for the cycle variables below.</p>
+            <p>&nbsp</p>
+
+            <div class="calc-begin">
+                <p><b>Working fluid:</b></p>
+                <select name="working-fluid" id="working-fluid-selecter" class="custom-select" style="width:250px">
+                    <option value="R1233zd(E)">R1233zd(E)</option>
+                    <option value="n-pentane">n-pentane</option>
+                    <option value="MM">MM</option> 
+                </select><p>&nbsp</p>
+              
+                <label for="evaporation-temperature">Evaporation temperature [K]:</label>
+                <div class="fixed">
+                    <input name="evaporation-temperature" id="evaporation-temperature" type="text" min ="278" max ="383" value=313>
+                    <span class="comment">Please select a value between 278 and 383</span>
+                </div>
+
+                <label for="compressor-superheat">Compressor superheat [K]:</label>
+                <div class="fixed">
+                    <input name="compressor-superheat" id="compressor-superheat" type="text" min="0" max="20" required value=5>
+                    <span class="comment">Please select a value between 0 and 20</span>
+                </div>
+
+                <label for="pressure-ratio">Pressure ratio [-]:</label>
+                <div class="fixed">
+                    <input name="pressure-ratio" id="pressure-ratio" type="text" min="1" max="50" required value=5>
+                    <span class="comment">Please select a value between 1 and 50</span>
+                </div>
+
+                <label for="expansion-value-subcooling">Expansion valve subcooling [K]:</label>
+                <div class="fixed">
+                    <input name="expansion-value-subcooling" id="expansion-value-subcooling" type="text" min="0" max="50" required value=10>
+                    <span class="comment">Please select a value between 0 and 50</span>
+                </div> 
+
+                <label for="internal-heat-exchange-temp">Internal heat-exchange temperature difference [K]:</label>
+                <div class="fixed">
+                    <input name="internal-heat-exchange-temp" id="internal-heat-exchange-temp" type="text" min="0"  max="100" required value=10> 
+                    <span class="comment">Please select a value between 0 and 100</span>
+                </div>   
+
+                <label for="heat-source-outlet">Heat-source outlet temperature [K]:</label>
+                <div class="fixed">
+                    <input name="heat-source-outlet" id="heat-source-outlet" type="text" min="283" max="673" required value=303>
+                    <span class="comment">Please select a value between 283 and 673</span>
+                </div>
+            </div>
+        </div>
+        <p>&nbsp</p>
+        <hr>
+        <p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Single cycle study</h2>
+            <p>&nbsp</p>
+            <p>Having now selected your set of variables, it's time to see how the cycle performs. Hit the button below to find out. The results in the table summarise key performance metrics, as well as the work or thermal load of each component. The UA values are an indicator of the heat exchanger requirements and the pinch points indicate the minimum temperature differences in each heat exchange process.</p>
+            <p>&nbsp</p>
+            <p>It is also useful to view the cycle on a thermodynamic plane of choice. You can choose between temperature-entropy, pressure-enthalpy and pressure-volume. In the resulting figures, the green region indicates the state points of the working fluid throughout the cycle. Where relevant, the heat source (blue) and heat sink (red) temperature profiles are superimposed onto the cycle.</p>
+            <p>&nbsp</p>
+ 
+            <div class="calc-begin">
+                <select name="select-types" id="single-study-select" type="submit" class="custom-select" style="width:250px">
+                    <option value="temperature-entropy">temperature-entropy (Ts)</option>
+                    <option value="pressure-enthalpy">pressure-enthalpy (ph)</option>
+                    <option value="pressure-volume">pressure-volume (pv)</option>
+                </select> 
+                <button id="single-cycle-hp" class="btn" type="button" style="font-size: 14px;">Run single study</button>
+                <p>&nbsp</p>
+            </div>
+
+            <div id="single_study_plot"></div>
+
+	    <p>&nbsp</p>
+	    <p>Note: Negative pinch points (reported in red below) indicate unphysical heat exchange profiles, and therefore indicate infeasible heat pump system configurations. In general, the best performance can be expected when the pinch points are minimised, but still positive. However, very low pinch points imply large heat transfer areas.</p>
+ 	    <p>&nbsp</p>
+
+            <table class="styled-table">                
+                <tbody>
+                    <tr>
+                        <th id="firstcolumn">Coefficient of performance [-]</th>
+                        <td id="coefficient-of-performance">0</td>
+                        <th id="firstcolumn">UA (hot) [kW/K]</th>
+                        <td id="ua-hot">0</td>
+                    </tr>
+                    <tr>
+                        <th id="firstcolumn">Compressor work [kW]</th>
+                        <td id="compressor-work">0</td>
+                        <th id="firstcolumn">UA (cold) [kW/K]</th>
+                        <td id="ua-cold">0</td>
+                    </tr>
+
+                    <tr>
+                        <th id="firstcolumn">Heater [kW]</th>
+                        <td id="heat-input">0</td>
+                        <th id="firstcolumn">UA (recup) [kW/K]</th>
+                        <td id="ua-recup">0</td>
+                    </tr>
+                                                    
+                    <tr>
+                        <th id="firstcolumn">Cooler [kW]</th>
+                        <td id="heat-output">0</td>
+                        <th id="firstcolumn">Pinch (hot) [K]</th>
+                        <td id="pp-hot">0</td>
+                    </tr>
+                                                
+                    <tr>
+                        <th id="firstcolumn">Recuperation [kW]</th>
+                        <td id="heat-recuperated">0</td>
+                        <th id="firstcolumn">Pinch (cold) [K]</th>
+                        <td id="pp-cold">0</td>
+                    </tr>
+                                                
+                    <tr>
+                        <th id="firstcolumn">Mass flow [kg/s]</th>
+                        <td id="mass-flow-rate">0</td>
+                        <th id="firstcolumn">Pinch (rec.) [K]</th>
+                        <td id="pp-recup">0</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!----------------------- State of Properties: ----------------------->
+            <div class="body">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <td></td>
+                            <th>Compressor inlet</th>
+                            <th>Compressor outlet</th>
+                            <th>Saturated vapour (high pressure)</th>
+                            <th>Saturated liquid (high pressure)</th>
+                            <th>Recup. inlet (high pressure)</th>
+                            <th>Expansion valve inlet</th>
+                            <th>Expansion valve outlet</th>
+                            <th>Saturated vapour (low pressure)</th>
+                            <th>Recup. inlet (low pressure)</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <th id="firstcolumn">Temperature [K]</th>
+                            <td id="pl-1">0</td>
+                            <td id="po-1">0</td>
+                            <td id="roh-1">0</td>
+                            <td id="slh-1">0</td>
+                            <td id="svh-1">0</td>
+                            <td id="ei-1">0</td>
+                            <td id="eo-1">0</td>
+                            <td id="rol-1">0</td>
+                            <td id="svl-1">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Pressure [kPa]</th>
+                            <td id="pl-2">0</td>
+                            <td id="po-2">0</td>
+                            <td id="roh-2">0</td>
+                            <td id="slh-2">0</td>
+                            <td id="svh-2">0</td>
+                            <td id="ei-2">0</td>
+                            <td id="eo-2">0</td>
+                            <td id="rol-2">0</td>
+                            <td id="svl-2">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Enthalpy [kJ/kg]</th>
+                            <td id="pl-3">0</td>
+                            <td id="po-3">0</td>
+                            <td id="roh-3">0</td>
+                            <td id="slh-3">0</td>
+                            <td id="svh-3">0</td>
+                            <td id="ei-3">0</td>
+                            <td id="eo-3">0</td>
+                            <td id="rol-3">0</td>
+                            <td id="svl-3">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Entropy [kJ/(kg K)]</th>
+                            <td id="pl-4">0</td>
+                            <td id="po-4">0</td>
+                            <td id="roh-4">0</td>
+                            <td id="slh-4">0</td>
+                            <td id="svh-4">0</td>
+                            <td id="ei-4">0</td>
+                            <td id="eo-4">0</td>
+                            <td id="rol-4">0</td>
+                            <td id="svl-4">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Density [kg/m&sup3;]</th>
+                            <td id="pl-5">0</td>
+                            <td id="po-5">0</td>
+                            <td id="roh-5">0</td>
+                            <td id="slh-5">0</td>
+                            <td id="svh-5">0</td>
+                            <td id="ei-5">0</td>
+                            <td id="eo-5">0</td>
+                            <td id="rol-5">0</td>
+                            <td id="svl-5">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p>&nbsp</p>
+        <hr>
+        <p>&nbsp</p>
+
+        <div class="body-contents">
+
+            <h2>Parametric study</h2>
+            <p>&nbsp</p>
+            <p>Want to understand how the different cycle variables can influence performance? Then pick a variable from the drop-down box below, alongside the minimum and maximum values you want to consider, and hit run to populate the table. All other variables are assumed constant as defined earlier.</p>
+            <p>&nbsp</p>
+
+            <div class="calc-begin">
+                <select name="param-study" id="param-study-selecter" type="submit" class="custom-select" style="width:300px">
+                    <option value="Evaporation-temp">Evaporation temperature [K]</option>
+                    <option value="Compressor-superheat">Compressor superheat [K]</option>
+                    <option value="Pressure">Pressure ratio [-]</option>
+                    <option value="Subcooling">Expansion valve subcooling [K]</option>
+                    <option value="Internal-heat">Internal heat exchange [K]</option>
+                    <option value="Heat-source-outlet">Heat-source outlet temperature [K]</option>
+                </select><p>&nbsp</p>
+
+                <label for="min-Param">Minimum value:</label>
+                <input name="min-Param" id="min-Param" />
+                <p>&nbsp</p>
+
+                <label for="max-Param">Maximum value:</label>
+                <input name="max-Param" id="max-Param" />
+                <p>&nbsp</p>
+                <button id="param-cycle-hp" class="btn" type="button" style="font-size: 14px;">Run parametric study</button>
+            </div>
+
+	    <p>&nbsp</p>
+	    <p>Remember, negative pinch points indicate unphysical heat exchange profiles, and therefore indicate infeasible heat pump system configurations.<p>
+	    <p>&nbsp</p>
+
+            <div class="body">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <th><span id="param-name-hp">Parameter: </span></th>
+                            <th>Coefficient of performance [-]</th>
+                            <th>Compressor work [kW]</th>
+                            <th>Heater [kW]</th>
+                            <th>Cooler [kW]</th>
+                            <th>Recup. [kW]</th>
+                            <th>Mass flow [kg/s]</th>
+                            <th>UA (hot) [kW/K]</th>
+                            <th>UA (cold) [kW/K]</th>
+                            <th>UA (rec.) [kW/K]</th>
+                            <th>Pinch (hot) [K]</th>
+                            <th>Pinch (cold) [K]</th>
+                            <th>Pinch (rec.) [K]</th>
+                        </tr>
+                    </thead>
+                                    
+                    <tbody>
+                        <tr>
+                            <td id="var-1">0</td>
+                            <td id="cop-1">0</td>
+                            <td id="Wc-1">0</td>
+                            <td id="Qh-1">0</td>
+                            <td id="Qc-1">0</td>
+                            <td id="Qr-1">0</td>
+                            <td id="mdot-1">0</td>
+                            <td id="uah-1">0</td>
+                            <td id="uac-1">0</td>
+                            <td id="uar-1">0</td>
+                            <td id="pph-1">0</td>
+                            <td id="ppc-1">0</td>
+                            <td id="ppr-1">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-2">0</td>
+                            <td id="cop-2">0</td>
+                            <td id="Wc-2">0</td>
+                            <td id="Qh-2">0</td>
+                            <td id="Qc-2">0</td>
+                            <td id="Qr-2">0</td>
+                            <td id="mdot-2">0</td>
+                            <td id="uah-2">0</td>
+                            <td id="uac-2">0</td>
+                            <td id="uar-2">0</td>
+                            <td id="pph-2">0</td>
+                            <td id="ppc-2">0</td>
+                            <td id="ppr-2">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-3">0</td>
+                            <td id="cop-3">0</td>
+                            <td id="Wc-3">0</td>
+                            <td id="Qh-3">0</td>
+                            <td id="Qc-3">0</td>
+                            <td id="Qr-3">0</td>
+                            <td id="mdot-3">0</td>
+                            <td id="uah-3">0</td>
+                            <td id="uac-3">0</td>
+                            <td id="uar-3">0</td>
+                            <td id="pph-3">0</td>
+                            <td id="ppc-3">0</td>
+                            <td id="ppr-3">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-4">0</td>
+                            <td id="cop-4">0</td>
+                            <td id="Wc-4">0</td>
+                            <td id="Qh-4">0</td>
+                            <td id="Qc-4">0</td>
+                            <td id="Qr-4">0</td>
+                            <td id="mdot-4">0</td>
+                            <td id="uah-4">0</td>
+                            <td id="uac-4">0</td>
+                            <td id="uar-4">0</td>
+                            <td id="pph-4">0</td>
+                            <td id="ppc-4">0</td>
+                            <td id="ppr-4">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-5">0</td>
+                            <td id="cop-5">0</td>
+                            <td id="Wc-5">0</td>
+                            <td id="Qh-5">0</td>
+                            <td id="Qc-5">0</td>
+                            <td id="Qr-5">0</td>
+                            <td id="mdot-5">0</td>
+                            <td id="uah-5">0</td>
+                            <td id="uac-5">0</td>
+                            <td id="uar-5">0</td>
+                            <td id="pph-5">0</td>
+                            <td id="ppc-5">0</td>
+                            <td id="ppr-5">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-6">0</td>
+                            <td id="cop-6">0</td>
+                            <td id="Wc-6">0</td>
+                            <td id="Qh-6">0</td>
+                            <td id="Qc-6">0</td>
+                            <td id="Qr-6">0</td>
+                            <td id="mdot-6">0</td>
+                            <td id="uah-6">0</td>
+                            <td id="uac-6">0</td>
+                            <td id="uar-6">0</td>
+                            <td id="pph-6">0</td>
+                            <td id="ppc-6">0</td>
+                            <td id="ppr-6">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-7">0</td>
+                            <td id="cop-7">0</td>
+                            <td id="Wc-7">0</td>
+                            <td id="Qh-7">0</td>
+                            <td id="Qc-7">0</td>
+                            <td id="Qr-7">0</td>
+                            <td id="mdot-7">0</td>
+                            <td id="uah-7">0</td>
+                            <td id="uac-7">0</td>
+                            <td id="uar-7">0</td>
+                            <td id="pph-7">0</td>
+                            <td id="ppc-7">0</td>
+                            <td id="ppr-7">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-8">0</td>
+                            <td id="cop-8">0</td>
+                            <td id="Wc-8">0</td>
+                            <td id="Qh-8">0</td>
+                            <td id="Qc-8">0</td>
+                            <td id="Qr-8">0</td>
+                            <td id="mdot-8">0</td>
+                            <td id="uah-8">0</td>
+                            <td id="uac-8">0</td>
+                            <td id="uar-8">0</td>
+                            <td id="pph-8">0</td>
+                            <td id="ppc-8">0</td>
+                            <td id="ppr-8">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-9">0</td>
+                            <td id="cop-9">0</td>
+                            <td id="Wc-9">0</td>
+                            <td id="Qh-9">0</td>
+                            <td id="Qc-9">0</td>
+                            <td id="Qr-9">0</td>
+                            <td id="mdot-9">0</td>
+                            <td id="uah-9">0</td>
+                            <td id="uac-9">0</td>
+                            <td id="uar-9">0</td>
+                            <td id="pph-9">0</td>
+                            <td id="ppc-9">0</td>
+                            <td id="ppr-9">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-10">0</td>
+                            <td id="cop-10">0</td>
+                            <td id="Wc-10">0</td>
+                            <td id="Qh-10">0</td>
+                            <td id="Qc-10">0</td>
+                            <td id="Qr-10">0</td>
+                            <td id="mdot-10">0</td>
+                            <td id="uah-10">0</td>
+                            <td id="uac-10">0</td>
+                            <td id="uar-10">0</td>
+                            <td id="pph-10">0</td>
+                            <td id="ppc-10">0</td>
+                            <td id="ppr-10">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p>&nbsp</p>
+        
+        <!--------------------------- Footer: --------------------------->
+        <hr><p>&nbsp</p>
+         <footer> <small>&copy; Copyright 2023, Martin T. White</small><p>&nbsp</p>
+            <small>The contribution of Piyathida Suwannakat through her summer internship funded by the Royal Academy of Engineering is also gratefully acknowledged. <a href="https://raeng.org.uk/news/academy-leverages-its-unrivalled-networks-to-secure-internships-for-eight-engineering-undergraduates">Click here for more details</a></small><p>&nbsp</p></footer> 
+
+    </section>
+
+
+    <!----------------------- JS Functionality: sidebar ----------------------->
+    <script>
+        let arrow = document.querySelectorAll(".arrow");
+        for (var i = 0; i < arrow.length; i++) {
+            arrow[i].addEventListener("click", (e)=>{
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+            });
+        }
+
+        let sidebar = document.querySelector(".sidebar");
+        let sidebarMenu = document.querySelector(".bx-menu");
+        
+        sidebarMenu.addEventListener("click", ()=>{
+            sidebar.classList.toggle("close");
+        });
+    </script>
+
+    <py-script src="./python_html/pocketHP.py"></py-script>
+    
+</body>
+</html>

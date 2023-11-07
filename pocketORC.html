@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+    
+<head>
+    <title>pocketORC</title>     
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------ PocketORC: CSS ----------------->
+    <link rel="stylesheet" href="./css/pocketTHERM.css" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <!--------------- BDN boxicon link: --------------->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script src="./js/pocketTHERM.js"></script>
+</head>
+    
+<body>
+    <py-config>
+        packages = ["numpy","matplotlib","pandas"]
+        
+        [[fetch]]
+        files = ["pocketORC.py"]
+        from = 'python_html'
+        
+        [[fetch]]
+        files = ["thermo_props.py","orc_simulator.py"]
+        from = 'python_modules'        
+        
+        [[fetch]]
+        files = ["n-pentane.csv","MM.csv", "R1233zd(E).csv"]
+        from = 'fluids'
+        
+    </py-config>
+    
+    <!-------------------------- Begin: Sidebar ---------------------------->
+    <div class="sidebar">
+        <div class="logo-details">
+            <i class='bx bxl-pocket' ></i>
+            <span class="logo-name">pocketTHERM</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="./index.html">
+                    <i class='bx bxs-home'></i>
+                    <span class="link-name">Home</span>
+                </a>
+                <ul class="sub-menu blank">
+                    <li><a href="#" class="link-name">Homepage</a></li>
+                </ul>
+            </li>
+
+            <!------------------------ Calculators: ------------------------>
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bx-math' ></i>
+                        <span class="link-name">Calculators</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">Calculators</a></li>
+                    <li><a href="./pocketORC.html">pocketORC</a><li>
+                    <li><a href="./pocketHP.html">pocketHP</a></li>
+                </ul>
+            </li>     
+
+            <!-------------------------- Lessons: -------------------------->
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bxs-book-content'></i>
+                        <span class="link-name">ORC lessons</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">ORC lessons</a></li>
+                    <li><a href="./lesson1.html">1. Saturated states</a></li>
+                    <li><a href="./lesson2.html">2. Single-phase states</a></li>
+                    <li><a href="./lesson3.html">3. Ideal and real cycles</a></li>
+                    <li><a href="./lesson4.html">4. Recuperation</a></li>
+                    <li><a href="./lesson5.html">5. Heat source and sink</a></li>
+                    <li><a href="./lesson6.html">6. Alternative cycles</a></li>
+                </ul>
+            </li>  
+        </ul>
+        <div class="profile-details">
+            <div class="profile-content"></div>
+            <div class="name-job">
+                <div class="profile-name">Dr. Martin T. White</div>
+            </div>
+            <a href="https://www.linkedin.com/in/martin-t-white"><i class='bx bxl-linkedin-square'></i></a>
+        </div>   
+    </div> 
+    <!--------------------------- END of sidebar: ---------------------------->
+
+    <!--------------------------- Homepage Content: -------------------------->
+    <section class="home-section">
+        
+        <div class="home-content">
+            <i class="bx bx-menu"></i>
+            <h1>pocketORC: Organic Rankine cycle design model</h1>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="introduction"> 
+            <h2>Introduction</h2>
+            <p>&nbsp</p>
+            <p>pocketORC is a steady-state design model for organic Rankine cycle (ORC) power plants that operates straight from the browser (and hence from the phone in your pocket). The underlying model is written in the Python programming language and the PyScript framework is used to call Python code directly from HTML.</p>
+            <p>&nbsp</p>
+            <p>pocketORC is intended to be used as a teaching aid to explore basic principles relating to ORC power systems, whilst also serving as a pocket calculator for people working within the ORC field. The current version combines the Peng-Robinson equation of state with a thermodynamic model of a recuperated ORC system and discretised heat exchanger sizing models. The user can vary cycle variables via the web form which returns performance data. The model enables single-point calculation, or parametric studies of a single variable.</p>
+            <p>&nbsp</p>
+            <p>If you know your way around an ORC system, then jump straight in using the form below. Alternatively, you can follow the lessons available in the left-hand menu. These will talk you through and introduce the main model inputs and variables.</p>
+            <p>&nbsp</p>
+            <p>Interested in finding out about the calculations that take place under the hood of pocketORC? Then why not <a href=../docs/pocketORC_theory_V1.pdf>download the theory guide here.</a></p>
+            <p>&nbsp</p>
+            <h4>A note on thermodynamic property calculation</h4>
+            <p>&nbsp</p>
+            <p>Thermodynamic properties are calculated using a specifically designed module based on the Peng-Robinson equation of state. Although this is not as accurate as state-of-the-art multi-parameter equations of state commonly used (e.g., <a href="http://www.coolprop.org/">CoolProp</a> and <a href="https://www.nist.gov/srd/refprop">REFPROP</a>), the model is known to provide reasonable predictions for fluid properties, particularly in the vapour-phase region. In previous work, a maximum deviation in power output of 5.9% was found between cycle calculations completed using the Peng-Robinson equation of state and using REFPROP. This level of accuracy is considered sufficient for a tool whose primary purpose is teaching. For more information, please see the published paper:</p>
+            <p>&nbsp</p>
+            <p><a href="https://www.mdpi.com/1996-1073/11/4/800">White, M.T., Sayma, A.I, 2018, A generalised assessment of working fluids and radial turbines for non-recuperated subcritical organic Rankine cycles, Energies, 11(4), 800.</a></p>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+
+        <!---
+        <div class="body-content1">
+            <div class="body-1-heading">
+                <h2>Environment impact of Refrigerants</h2>
+            </div>
+            <div class="body-1">
+                <div class="pancake">
+                    <div class="box">
+                    <p>&nbsp</p>
+                        <h3>Types of refrigerants:</h3>
+                        <p>&nbsp</p>
+                        <div class="body-1-detail">
+                            <p>1. <b>Halocarbons</b> or freons</p>
+                            <p>2. <b>Azeotropic</b> refrigerants</p>
+                            <p>3. <b>Zeotropic</b> refrigerants</p>
+                            <p>4. Inorganic refrigerants: carbon dioxide, ammonia, water and air.</p>                        
+                            <p>5. Hydrocarbon refrigerants</p>
+                        </div>
+                    </div>
+
+                    <div class="box">
+                    <p>&nbsp</p>
+                        <h3>Global Warming Potential (GWP)</h3>
+                        <p>&nbsp</p>
+                        <div class="body-2-detail">
+                            <p>It depends how strong the gas absorbs infrared thermal radiation a greenhouse gas added to the atmosphere would absorb over a given time frame, as a multiple of the radiation that would absorb the same mass of added carbon dioxide, in which Global Warming Potential is one of carbon dioxide.</p><p>&nbsp</p>
+                            <img src="./assets/thermal-radiation.png" alt="Thernal radiation" class="zoom">
+                        </div>
+                    </div>
+
+                    <div class="box">
+                    <p>&nbsp</p>
+                        <h3>Ozone Depletion Potential (ODP)</h3>
+                        <p>&nbsp</p>
+                        <div class="body-3-detail">
+                            <p>The relative amount of degradation to the ozone layer, it can cause with trichlorofluoromethane (<a href="">R-11</a> or <a href="">CFC-11</a>) in which the maximum potential amongst chlorocarbons because of the presence of three chlorine atoms in the molecule.</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="ref1">
+                    <p>For more information, please visit: 
+                    <a href="https://enggcyclopedia.com/2012/01/types-refrigerants/?utm_content=cmp-true">ref1</a>,
+                    <a href="https://www.thetrainingcenter.com/odp-vs-gwp-why-they-are-both-important">ref2</a>,
+                    <a href="https://en.wikipedia.org/wiki/Ozone_depletion_potential">ref3</a>, 
+                    <a href="https://en.wikipedia.org/wiki/Global_warming_potential">ref4</a>, and
+                    <a href="https://www.swep.net/refrigerant-handbook/refrigerant-handbook/">Refrigerant handbooks</a>
+                    </p><p>&nbsp</p>
+                </div>                
+            </div> 
+        </div>
+        <hr><p>&nbsp</p>
+        --->
+
+        <div class="body-contents">
+            <h2>Operating principle of an ORC</h2>
+            <p>&nbsp</p>
+            <p>A simple organic Rankine cycle (ORC) power system is based on four thermodynamic processes, each of which is carried out by a specific piece of equipment. The cycle is also a closed loop in that after carrying out the four process sequentially the properties of the circulating working fluid return to the original conditions. A schematic of this cycle is shown in the figure at the bottom of this section.</p>
+            <p>&nbsp</p>
+            <p>We start our cycle at the inlet to the pump, referenced as station 1, where the working fluid starts in a cold, liquid state at low pressure. The job of the pump is to increase the pressure of the liquid to a higher pressure, which is achieved via the addition of work using a motor.</p>
+            <p>&nbsp</p>
+            <p>After the pump, referenced as station 2, the high pressure liquid then enters the evaporator which uses the available heat source to heat up and evaporate the working fluid, thus generating vapour at a high temperature and pressure.</p>
+            <p>&nbsp</p>
+            <p>This vapour then moves to the expander inlet, referenced as station 3, where the fluid is expanded. During this process, the pressure of the working fluid reduces, and mechanical work is extracted by the expander. This mechanical work is converted to electricity using a generator.</p>
+            <p>&nbsp</p>
+            <p>The working fluid leaving the expander, referenced as station 4, is at low pressure but is still in a vapour state. The final process is to cool down and condense the working fluid using a condenser. This returns the working fluid back to its initial state. During this process, heat is rejected from the cycle to the available heat sink.</p>
+            <p>&nbsp</p>
+            <p>The efficiency of the simple ORC system can be improved with the addition of a recuperator. The job of this component is to use the heat contained within the working fluid leaving the expander in order to heat up the liquid leaving the pump. This reduces the amount of heat required from the heat source, and reduces the amount of heat rejected to the heat sink. This cycle is also reported in the figure below.</p>
+            <p>&nbsp</p>
+            <p>&nbsp</p> 
+
+            <img src="../assets/pocketORC_schematics.png" alt="prof" style="zoom" class="image" style="width:90%"><p>&nbsp</p>
+            <span>Schematics of a simple ORC system (left) and recuperated ORC system (right)</span>
+            
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Fixed parameters</h2>
+            <p>&nbsp</p>
+            <p>The general goal for an ORC designer is to design the system for a particular application. This generally corresponds to a known heat source and heat sink. The calculator assumes both the heat source and heat sink are defined as sensible fluid streams with a finite mass-flow rate and constant specific-heat capacity. Enter those details below.</p><p>&nbsp</p>
+            <p>&nbsp</p>
+            <div class="calc-begin">
+                <!-------------- Heat-source: ---------------->
+                <div class="heat-source">
+                    <h3><b>Heat-source conditions:</b></h3>
+                    <p>&nbsp</p>
+
+                    <label for="heat-source-temperature">Inlet temperature [K]:</label>
+                    <div class="fixed">
+                        <input name="heat-source-temperature" id="heat-source-temperature" type="text" min="323" max="673" required="required"  value=473>
+                        <span class="comment">Please select a value between 323 and 673</span>
+                    </div>
+
+                    <label for="heat-source-mass-flow">Mass-flow rate [kg/s]:</label>
+                    <div class="fixed">
+                        <input name="heat-source-mass-flow" id="heat-source-mass-flow" type="text" min="0" max="1000" required value=1> 
+                        <span class="comment">Please select a value between 0 and 1000</span>
+                    </div>
+
+                    <label for="heat-source-heat-capacity">Specific-heat capacity [J/(kg K)]:</label>
+                    <div class="fixed">
+                        <input name="heat-source-heat-capacity" id="heat-source-heat-capacity" type="text" min="0" max="10000" required value=1000>
+                        <span class="comment">Please select a value between 0 and 10000</span>
+                    </div><p>&nbsp</p><p>&nbsp</p>
+                </div>
+
+                <!-------------- Heat-sink: ---------------->
+                <div class="heat-sink">
+                    <h3><b>Heat-sink conditions:</b></h3>
+                    <p>&nbsp</p>
+                    
+                    <label for="heat-sink-temperature">Inlet temperature [K]:</label>
+                    <div class="fixed">
+                        <input name="heat-sink-temperature" id="heat-sink-temperature" type="text" min="273" max="373" required value=288>
+                        <span class="comment">Please select a value between 273 and 373</span>
+                    </div>
+
+                    <label for="heat-sink-mass-flow">Mass-flow rate [kg/s]:</label>
+                    <div class="fixed">
+                        <input name="heat-sink-mass-flow" id="heat-sink-mass-flow" type="text" min="0" max="1000" required value=1>
+                        <span class="comment">Please select a value between 0 and 1000</span>
+                    </div>
+
+                    <label for="heat-sink-heat-capacity">Specific-heat capacity [J/(kg K)]:</label>
+                    <div class="fixed">
+                        <input name="heat-sink-heat-capacity" id="heat-sink-heat-capacity" type="text" min="0" max="10000" required value=4200>
+                        <span class="comment">Please select a value between 0 and 10000</span>
+                    </div><p>&nbsp</p>
+                </div>
+                <p>&nbsp</p>
+
+                <!-------- Component efficiencies: --------->
+                <div class="comp-eff">
+                    <h3><b>Component efficiencies:</b></h3>
+                    <p>&nbsp</p>
+                    <div class="calc-mention">
+                    <p>As a first assumption it is generally acceptable to assume that key system components, such as the pump and expander, operate with a fixed isentropic efficiency. Enter assumptions for these below.</p>
+                    <p>&nbsp</p>
+                </div>
+                    <label for="pump-efficiency">Pump isentropic efficiency [%]:</label>
+                    <div class="fixed">
+                        <input name="pump-efficiency" id="pump-efficiency" type="text" min="0" max="100" required value=70>
+                        <span class="comment">Please select a value between 0 and 100</span>
+                    </div>
+
+                    <label for="turbine-efficiency">Turbine isentropic efficiency [%]:</label>
+                    <div class="fixed">
+                        <input name="turbine-efficiency" id="turbine-efficiency" type="text" min="0" max="100" required value=80>
+                        <span class="comment">Please select a value between 0 and 100</span>
+                    </div><p>&nbsp</p><p>&nbsp</p>
+                </div>
+            </div>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Cycle variables</h2>
+            <p>&nbsp</p>
+            <p>To optimise the performance of the ORC system, the ORC designer has a number of different levers to pull. This includes changing the working fluid (i.e., the fluid circulating within the system), alongside a number of different thermodynamic variables. You can select the working fluid, and provide values for the cycle variables below.</p>
+            <p>&nbsp</p>
+
+            <div class="calc-begin">
+                <p>Working fluid:</p>
+                <select name="working-fluid" id="working-fluid-select" class="custom-select" style="width:250px">
+                    <option value="R1233zd(E)">R1233zd(E)</option>
+                    <option value="n-pentane">n-pentane</option>
+                    <option value="MM">MM</option> 
+                </select><p>&nbsp</p>
+
+                <label for="condensation-temperature">Condensation temperature [K]:</label>
+                <div class="fixed">
+                    <input name="condensation-temperature" id="condensation-temperature" type="text" min ="278" max ="383" value=313>
+                    <span class="comment">Please select a value between 278 and 383</span>
+                </div>
+
+                <label for="pump-subcooling">Subcooling at pump inlet [K]:</label>
+                <div class="fixed">
+                    <input name="pump-subcooling" id="pump-subcooling" type="text" min="0" max="20" required value=2>
+                    <span class="comment">Please select a value between 0 and 20</span>
+                </div>
+
+                <label for="pressure-ratio">Pressure ratio [-]:</label>
+                <div class="fixed">
+                    <input name="pressure-ratio" id="pressure-ratio" type="text" min="1" max="50" required value=5>
+                    <span class="comment">Please select a value between 1 and 50</span>
+                </div>
+
+                <label for="expander-inlet">Expander inlet parameter [-]: <sup>*</sup> </label>
+                
+                <div class="fixed">
+                    <input name="expander-inlet" id="expander-inlet" type="text" min="0" max="2" required value=1.5>
+                    <span class="comment">Please select a value between 0 and 2</span>
+                </div> 
+
+                <label for="recuperator-effectiveness">Recuperator effectiveness [%]:</label>
+                <div class="fixed">
+                    <input name="recuperator-effectiveness" id="recuperator-effectiveness" type="text" min="0"  max="100" require value=70> 
+                    <span class="comment">Please select a value between 0 and 100</span>
+                </div> 
+
+                <label for="heat-source-outlet">Heat-source outlet temperature [K]:</label>
+                <div class="fixed">
+                    <input name="heat-source-outlet" id="heat-source-outlet" type="text" min="283" max="673" required value=423>
+                    <span class="comment">Please select a value between 283 and 673</span>
+                </div>
+                <p>&nbsp</p>
+                <p><sup>*</sup> The expander inlet parameter can range between 0 and 2, and controls the expander inlet condition. For two-phase expansion set the value equal to the desired inlet vapour quality. A value between 1 and 2 corresonds to a superheated cycle, where the limits of 1 and 2 correspond to no superheat and maximum superheat respectively. For more information, take a look at <a href="../lessons/lesson6.html">Lesson 6</a>.</p>
+                <p>&nbsp</p>
+            </div>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Single cycle study</h2>
+            <p>&nbsp</p>
+            <p>Having now selected your set of variables, it's time to see how the cycle performs. Hit the button below to find out. The results in the table summarise key performance metrics, as well as the work or thermal load of each component. The UA values are an indicator of the heat exchanger requirements and the pinch points indicate the minimum temperature differences in each heat exchange process.</p>
+            <p>&nbsp</p>
+            <p>It is also useful to view the cycle on a thermodynamic plane of choice. You can choose between temperature-entropy, pressure-enthalpy and pressure-volume. In the resulting figures, the green region indicates the state points of the working fluid throughout the cycle. Where relevant, the heat source (red) and heat sink (blue) temperature profiles are superimposed onto the cycle. </p><p>&nbsp</p>
+
+            <div class="calc-begin">
+                <select name="select-types" id="single-study-select" type="submit" class="custom-select" style="width:250px">
+                    <option value="temperature-entropy">temperature-entropy (Ts)</option>
+                    <option value="pressure-enthalpy">pressure-enthalpy (ph)</option>
+                    <option value="pressure-volume">pressure-volume (pv)</option>
+                </select> &nbsp
+                <button id="single-cycle" class="btn" style="font-size: 14px;">Run single study</button>
+                <p>&nbsp</p>
+            </div>
+
+            <div style="text-align: left" id="single_study_plot"></div>
+
+	    <p>&nbsp</p>
+	    <p>Note: Negative pinch points (reported in red below) indicate unphysical heat exchange profiles, and therefore indicate infeasible ORC system configurations. In general, the best performance can be expected when the pinch points are minimised, but still positive. However, very low pinch points imply large heat transfer areas.</p>
+ 	    <p>&nbsp</p>
+            
+            <table class="styled-table">
+                <tbody>
+                    <tr>
+                        <th id="firstcolumn">Efficiency (cycle) [%]</th>
+                        <td id="thermal-efficiency">0</td>
+                        <th id="firstcolumn">Recup [kW]</th>
+                        <td id="heat-recuperated">0</td>
+                    </tr>
+                    <tr>
+                        <th id="firstcolumn">Efficiency (exergy) [%]</th>
+                        <td id="second-law">0</td>
+                        <th id="firstcolumn">UA (hot) [kW/K]</th>
+                        <td id="ua-hot">0</td>
+                    </tr>
+                    <tr>
+                        <th id="firstcolumn">Mass flow [kg/s]</th>
+                        <td id="mass-flow-rate">0</td>
+                        <th id="firstcolumn">UA (cold) [kW/K]</th>
+                        <td id="ua-cold">0</td>
+                    </tr>                                                    
+                    <tr>
+                        <th id="firstcolumn">Net [kW]</th>
+                        <td id="power-output">0</td>
+                        <th id="firstcolumn">UA (recup) [kW/K]</th>
+                        <td id="ua-recup">0</td>
+                    </tr>    
+                    <tr>
+                        <th id="firstcolumn">Pump [kW]</th>
+                        <td id="pump-work">0</td>
+                        <th id="firstcolumn">Pinch (hot) [K]</th>
+                        <td id="pp-hot">0</td>
+                    </tr>
+                                            
+                    <tr>
+                        <th id="firstcolumn">Turbine [kW]</th>
+                        <td id="turbine-work">0</td>
+                        <th id="firstcolumn">Pinch (cold) [K]</th>
+                        <td id="pp-cold">0</td>
+                    </tr>
+                                                    
+                    <tr>
+                        <th id="firstcolumn">Heater  [kW]</th>
+                        <td id="heat-input">0</td>
+                        <th id="firstcolumn">Pinch (rec.) [K]</th>
+                        <td id="pp-recup">0</td>
+                    </tr>
+                    <tr>
+                        <th id="firstcolumn">Cooler [kW]</th>
+                        <td id="heat-output">0</td>
+                        <th id="firstcolumn"> </th>
+                        <td> </td>
+                    </tr> 
+                </tbody>
+            </table>    
+
+            <div class="body">
+                <table class="styled-table">
+                    <thead>
+                        <tr>
+                            <td></td>
+                            <th>Pump inlet</th>
+                            <th>Pump outlet</th>                            
+                            <th>Recup-oulet (HP)</th>
+                            <th>Saturated liquid (HP)</th>
+                            <th>Saturated vapour (HP)</th>
+                            <th>Expander inlet</th>
+                            <th>Expander outlet</th>
+                            <th>Recup-outlet (LP)</th>
+                            <th>Saturated vapour (LP)</th>
+                            <th>Saturated liquid (LP)</th>                   
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <th id="firstcolumn">Temperature [K]</th>
+                            <td id="pl-1">0</td>
+                            <td id="po-1">0</td>
+                            <td id="roh-1">0</td>
+                            <td id="slh-1">0</td>
+                            <td id="svh-1">0</td>
+                            <td id="ei-1">0</td>
+                            <td id="eo-1">0</td>
+                            <td id="rol-1">0</td>
+                            <td id="svl-1">0</td>
+                            <td id="shl-1">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Pressure [kPa]</th>
+                            <td id="pl-2">0</td>
+                            <td id="po-2">0</td>
+                            <td id="roh-2">0</td>
+                            <td id="slh-2">0</td>
+                            <td id="svh-2">0</td>
+                            <td id="ei-2">0</td>
+                            <td id="eo-2">0</td>
+                            <td id="rol-2">0</td>
+                            <td id="svl-2">0</td>
+                            <td id="shl-2">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Enthalpy [kJ/kg]</th>
+                            <td id="pl-3">0</td>
+                            <td id="po-3">0</td>
+                            <td id="roh-3">0</td>
+                            <td id="slh-3">0</td>
+                            <td id="svh-3">0</td>
+                            <td id="ei-3">0</td>
+                            <td id="eo-3">0</td>
+                            <td id="rol-3">0</td>
+                            <td id="svl-3">0</td>
+                            <td id="shl-3">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Entropy [kJ/(kg K)]</th>
+                            <td id="pl-4">0</td>
+                            <td id="po-4">0</td>
+                            <td id="roh-4">0</td>
+                            <td id="slh-4">0</td>
+                            <td id="svh-4">0</td>
+                            <td id="ei-4">0</td>
+                            <td id="eo-4">0</td>
+                            <td id="rol-4">0</td>
+                            <td id="svl-4">0</td>
+                            <td id="shl-4">0</td>
+                        </tr>
+
+                        <tr>
+                            <th id="firstcolumn">Density [kg/m&sup3;]</th>
+                            <td id="pl-5">0</td>
+                            <td id="po-5">0</td>
+                            <td id="roh-5">0</td>
+                            <td id="slh-5">0</td>
+                            <td id="svh-5">0</td>
+                            <td id="ei-5">0</td>
+                            <td id="eo-5">0</td>
+                            <td id="rol-5">0</td>
+                            <td id="svl-5">0</td>
+                            <td id="shl-5">0</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <p>&nbsp</p>
+        <hr><p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Parametric study</h2>
+            <p>&nbsp</p>
+            <p>Want to understand how the different cycle variables can influence performance? Then pick a variable from the drop-down box below, alongside the minimum and maximum values you want to consider, and hit run to populate the table. All other variables are assumed constant as defined earlier.</p>
+            <p>&nbsp</p>
+
+            <div class="calc-begin">
+                <select name="param-study" id="param-study-select" type="submit" class="custom-select" style="width:300px">
+                    <option value="Condensation-temperature">Condensation temperature [K]</option>
+                    <option value="Subcool">Subcooling at pump inlet [K]</option>
+                    <option value="Pressure-ratio">Pressure ratio [-]</option>
+                    <option value="Expander-inlet">Expander inlet parameter [-]</option>
+                    <option value="Recuperator">Recuperator effectiveness [%]</option>
+                    <option value="Heat-source-outlet">Heat-source outlet temperature [K]</option>
+                </select><p>&nbsp</p>
+
+                <label for="param-min">Minimum value:</label>
+                <input name="param-min" id="param-min"/>
+                <p>&nbsp</p>
+
+                <label for="param-max">Maximum value:</label>
+                <input name="param-max" id="param-max" />
+                <p>&nbsp</p>
+
+                <button id="param-cycle" class="btn" type="button" style="font-size: 14px;">Run parametric study</button>
+            </div>
+
+	    <p>&nbsp</p>
+	    <p>Remember, negative pinch points indicate unphysical heat exchange profiles, and therefore indicate infeasible ORC system configurations.<p>
+	    <p>&nbsp</p>
+            <div class="body">
+                <table class="styled-table">
+                    <thead>
+                        <th><span id="param-name-orc">Parameter: </span></th>
+                                            
+                        <th>Efficiency (cycle) [%]</th>
+                        <th>Efficiency (exergy) [%]</th>
+                        <th>Mass flow [kg/s]</th>
+                        <th>Net [kW]</th> 
+                        <th>Pump [kW]</th>
+                        <th>Turbine [kW]</th>
+                        <th>Heater [kW]</th>
+                        <th>Cooler [kW]</th>
+                        <th>Recup.[kW]</th>
+                        <th>UA (hot) [kW/K]</th>
+                        <th>UA (cold) [kW/K]</th>
+                        <th>UA (rec.) [kW/K]</th>
+                        <th>Pinch (hot) [K]</th>
+                        <th>Pinch (cold) [K]</th>
+                        <th>Pinch (rec.) [K]</th>
+                    </thead>
+
+                    <tbody>
+                        <tr>
+                            <td id="var-1">0</td>
+                            <td id="eta1-1">0</td>
+                            <td id="eta2-1">0</td>
+                            <td id="mdot-1">0</td>
+                            <td id="Wn-1">0</td>
+                            <td id="Wp-1">0</td>
+                            <td id="Wt-1">0</td>
+                            <td id="Qh-1">0</td>
+                            <td id="Qc-1">0</td>
+                            <td id="Qr-1">0</td>
+                            <td id="uah-1">0</td>
+                            <td id="uac-1">0</td>
+                            <td id="uar-1">0</td>
+                            <td id="pph-1">0</td>
+                            <td id="ppc-1">0</td>
+                            <td id="ppr-1">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-2">0</td>
+                            <td id="eta1-2">0</td>
+                            <td id="eta2-2">0</td>
+                            <td id="mdot-2">0</td>
+                            <td id="Wn-2">0</td>
+                            <td id="Wp-2">0</td>
+                            <td id="Wt-2">0</td>
+                            <td id="Qh-2">0</td>
+                            <td id="Qc-2">0</td>
+                            <td id="Qr-2">0</td>
+                            <td id="uah-2">0</td>
+                            <td id="uac-2">0</td>
+                            <td id="uar-2">0</td>
+                            <td id="pph-2">0</td>
+                            <td id="ppc-2">0</td>
+                            <td id="ppr-2">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-3">0</td>
+                            <td id="eta1-3">0</td>
+                            <td id="eta2-3">0</td>
+                            <td id="mdot-3">0</td>
+                            <td id="Wn-3">0</td>
+                            <td id="Wp-3">0</td>
+                            <td id="Wt-3">0</td>
+                            <td id="Qh-3">0</td>
+                            <td id="Qc-3">0</td>
+                            <td id="Qr-3">0</td>
+                            <td id="uah-3">0</td>
+                            <td id="uac-3">0</td>
+                            <td id="uar-3">0</td>
+                            <td id="pph-3">0</td>
+                            <td id="ppc-3">0</td>
+                            <td id="ppr-3">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-4">0</td>               
+                            <td id="eta1-4">0</td>
+                            <td id="eta2-4">0</td>
+                            <td id="mdot-4">0</td>
+                            <td id="Wn-4">0</td>
+                            <td id="Wp-4">0</td>
+                            <td id="Wt-4">0</td>
+                            <td id="Qh-4">0</td>
+                            <td id="Qc-4">0</td>
+                            <td id="Qr-4">0</td>
+                            <td id="uah-4">0</td>
+                            <td id="uac-4">0</td>
+                            <td id="uar-4">0</td>
+                            <td id="pph-4">0</td>
+                            <td id="ppc-4">0</td>
+                            <td id="ppr-4">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-5">0</td>
+                            <td id="eta1-5">0</td>
+                            <td id="eta2-5">0</td>
+                            <td id="mdot-5">0</td>
+                            <td id="Wn-5">0</td>
+                            <td id="Wp-5">0</td>
+                            <td id="Wt-5">0</td>
+                            <td id="Qh-5">0</td>
+                            <td id="Qc-5">0</td>
+                            <td id="Qr-5">0</td>
+                            <td id="uah-5">0</td>
+                            <td id="uac-5">0</td>
+                            <td id="uar-5">0</td>
+                            <td id="pph-5">0</td>
+                            <td id="ppc-5">0</td>
+                            <td id="ppr-5">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-6">0</td>
+                            <td id="eta1-6">0</td>
+                            <td id="eta2-6">0</td>
+                            <td id="mdot-6">0</td>
+                            <td id="Wn-6">0</td>
+                            <td id="Wp-6">0</td>
+                            <td id="Wt-6">0</td>
+                            <td id="Qh-6">0</td>
+                            <td id="Qc-6">0</td>
+                            <td id="Qr-6">0</td>
+                            <td id="uah-6">0</td>
+                            <td id="uac-6">0</td>
+                            <td id="uar-6">0</td>
+                            <td id="pph-6">0</td>
+                            <td id="ppc-6">0</td>
+                            <td id="ppr-6">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-7">0</td>
+                            <td id="eta1-7">0</td>
+                            <td id="eta2-7">0</td>
+                            <td id="mdot-7">0</td>
+                            <td id="Wn-7">0</td>
+                            <td id="Wp-7">0</td>
+                            <td id="Wt-7">0</td>
+                            <td id="Qh-7">0</td>
+                            <td id="Qc-7">0</td>
+                            <td id="Qr-7">0</td>
+                            <td id="uah-7">0</td>
+                            <td id="uac-7">0</td>
+                            <td id="uar-7">0</td>
+                            <td id="pph-7">0</td>
+                            <td id="ppc-7">0</td>
+                            <td id="ppr-7">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-8">0</td>
+                            <td id="eta1-8">0</td>
+                            <td id="eta2-8">0</td>
+                            <td id="mdot-8">0</td>
+                            <td id="Wn-8">0</td>
+                            <td id="Wp-8">0</td>
+                            <td id="Wt-8">0</td>
+                            <td id="Qh-8">0</td>
+                            <td id="Qc-8">0</td>
+                            <td id="Qr-8">0</td>
+                            <td id="uah-8">0</td>
+                            <td id="uac-8">0</td>
+                            <td id="uar-8">0</td>
+                            <td id="pph-8">0</td>
+                            <td id="ppc-8">0</td>
+                            <td id="ppr-8">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-9">0</td>
+                            <td id="eta1-9">0</td>
+                            <td id="eta2-9">0</td>
+                            <td id="mdot-9">0</td>
+                            <td id="Wn-9">0</td>
+                            <td id="Wp-9">0</td>
+                            <td id="Wt-9">0</td>
+                            <td id="Qh-9">0</td>
+                            <td id="Qc-9">0</td>
+                            <td id="Qr-9">0</td>
+                            <td id="uah-9">0</td>
+                            <td id="uac-9">0</td>
+                            <td id="uar-9">0</td>
+                            <td id="pph-9">0</td>
+                            <td id="ppc-9">0</td>
+                            <td id="ppr-9">0</td>
+                        </tr>
+                        <tr>
+                            <td id="var-10">0</td>
+                            <td id="eta1-10">0</td>
+                            <td id="eta2-10">0</td>
+                            <td id="mdot-10">0</td>
+                            <td id="Wn-10">0</td>
+                            <td id="Wp-10">0</td>
+                            <td id="Wt-10">0</td>
+                            <td id="Qh-10">0</td>
+                            <td id="Qc-10">0</td>
+                            <td id="Qr-10">0</td>
+                            <td id="uah-10">0</td>
+                            <td id="uac-10">0</td>
+                            <td id="uar-10">0</td>
+                            <td id="pph-10">0</td>
+                            <td id="ppc-10">0</td>
+                            <td id="ppr-10">0</td>
+                        </tr>
+                    </tbody>
+                </table>                              
+            </div>
+            <p>&nbsp</p>
+        </div>
+                   
+        <!--------------------------- Footer: --------------------------->
+        <hr><p>&nbsp</p>
+         <footer> <small>&copy; Copyright 2023, Martin T. White</small><p>&nbsp</p>
+            <small>The contribution of Piyathida Suwannakat through her summer internship funded by the Royal Academy of Engineering is also gratefully acknowledged. <a href="https://raeng.org.uk/news/academy-leverages-its-unrivalled-networks-to-secure-internships-for-eight-engineering-undergraduates">Click here for more details</a></small><p>&nbsp</p></footer> 
+
+    </section>
+
+    <!------------------------ Functionality: sidebar ----------------------->
+    <script>
+        let arrow = document.querySelectorAll(".arrow");
+        for (var i = 0; i < arrow.length; i++) {
+            arrow[i].addEventListener("click", (e)=>{
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+            });
+        }
+
+        let sidebar = document.querySelector(".sidebar");
+        let sidebarMenu = document.querySelector(".bx-menu");
+        
+        sidebarMenu.addEventListener("click", ()=>{
+            sidebar.classList.toggle("close");
+        });
+    </script>
+
+    <!------------------ Python file ----------------->
+    <py-script src="./python_html/pocketORC.py"></py-script>
+</body>
+</html>

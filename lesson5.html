@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <title>Lesson 5</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------ PocketORC: CSS ----------------->
+    <link rel="stylesheet" href="./css/pocketTHERM.css" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <!--------------- BDN boxicon link: --------------->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script src="./js/pocketTHERM.js"></script>
+</head>
+    
+<body>
+    <py-config>
+        packages = ["numpy", "matplotlib","pandas"]
+        
+        [[fetch]]
+        files = ["lesson5.py"]
+        from = 'python_html'
+        
+        [[fetch]]
+        files = ["thermo_props.py","orc_simulator.py"]
+        from = 'python_modules'        
+        
+        [[fetch]]
+        files = ["n-pentane.csv"]
+        from = 'fluids'
+        
+    </py-config>
+
+<!-------------------------- Begin: Sidebar ---------------------------->
+    <div class="sidebar">
+        <div class="logo-details">
+            <i class='bx bxl-pocket' ></i>
+            <span class="logo-name">pocketTHERM</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="./">
+                    <i class='bx bxs-home'></i>
+                    <span class="link-name">Home</span>
+                </a>
+                <ul class="sub-menu blank">
+                    <li><a href="#" class="link-name">Homepage</a></li>
+                </ul>
+            </li>
+
+            <!------------------------ Calculators: ------------------------>
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bx-math' ></i>
+                        <span class="link-name">Calculators</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">Calculators</a></li>
+                    <li><a href="./pocketORC.html">pocketORC</a><li>
+                    <li><a href="./pocketHP.html">pocketHP</a></li>
+                </ul>
+            </li>     
+
+            <!-------------------------- Lessons: -------------------------->
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bxs-book-content'></i>
+                        <span class="link-name">ORC lessons</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">ORC lessons</a></li>
+                    <li><a href="./lesson1.html">1. Saturated states</a></li>
+                    <li><a href="./lesson2.html">2. Single-phase states</a></li>
+                    <li><a href="./lesson3.html">3. Ideal and real cycles</a></li>
+                    <li><a href="./lesson4.html">4. Recuperation</a></li>
+                    <li><a href="./lesson5.html">5. Heat source and sink</a></li>
+                    <li><a href="./lesson6.html">6. Alternative cycles</a></li>
+                </ul>
+            </li>  
+        </ul>
+        <div class="profile-details">
+            <div class="profile-content"></div>
+            <div class="name-job">
+                <div class="profile-name">Dr. Martin T. White</div>
+            </div>
+            <a href="https://www.linkedin.com/in/martin-t-white"><i class='bx bxl-linkedin-square'></i></a>
+        </div>   
+    </div> 
+    <!--------------------------- END of sidebar: ---------------------------->
+
+    <!--------------------------- Homepage Content: -------------------------->
+    <section class="home-section">
+        <div class="home-content">
+            <i class="bx bx-menu"></i>
+            <h1>Lesson 5: Heat source and sink</h1>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+        <div class="introduction">
+            <h2>Introduction</h2>
+            <p>&nbsp</p>
+            <p>Up until now we have considered only the internal operation of our ORC system, and have considered fixed isothermal heat sources and heat sinks. In this fifth lesson, we introduce the definitions for the heat source and heat sink, and with it introduce our sixth, and final, system variable.</p>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+        <div class="body-contents">
+            <h2>Heat source</h2>
+            <p>&nbsp</p>
+            <p>Within pocketORC, the heat source is modelled as a sensible fluid stream at constant pressure with a constant specific heat capacity. Three inputs are required to model the heat source, and these are the temperature of the available heat source, the mass-flow rate of the available heat source, and the specific heat capacity. Generally, if you are designing or modelling an ORC system for a specific application, these inputs would be known or defined from the outset.</p>
+            <p>&nbsp</p>
+            <p>However, one parameter that is not known from the outset is the heat source outlet temperature. This is related to how much of the available heat source our ORC extracts, which is simply the product of mass flow rate, specific heat capacity and the heat source temperature drop.</p>
+            <p>&nbsp</p>
+            <p>Before this lesson, all of our analysis has been scale-agnostic (i.e., independent of the power rating), and we have evaluated each component on a specific basis (i.e., per kg of working fluid). With the introduction of the heat source, we can now determine the scale of our system. This is easily achieved since for a given heat source outlet temperature we know the total heat input into the ORC system in the evaporator. We can simply divide this by the specific thermal input (i.e., the change in enthalpy across the evaporator) to determine the mass flow rate of the circulating working fluid. This in turn enables us to calculate the power rating, or thermal load, of each component.</p>
+            <p>&nbsp</p>
+            <p>The overall performance of our ORC system, or more specifically the net power produced, is the product of how much heat is extracted from the heat source and the cycle efficiency, and these two parameters are often in direct competition. Moreover, it is not always feasible to reduce the heat source temperature to the lowest possible temperature (i.e., extract the maximum amount of heat), whilst achieving feasible temperature profiles in our heat exchanger. Considering these points it is possible that a cycle with a high thermal efficiency could restrict the possible heat source outlet temperature, which restricts the power output. On the other hand, a cycle with a lower cycle efficiency might allow a larger drop in heat source temperature and therefore produce a higher power output.</p>
+            <p>&nbsp</p>
+            <p>For this reason, the heat source outlet temperature, and therefore the amount of heat extracted by the ORC, can often also be considered as a cycle variable.</p>
+            <p>&nbsp</p>
+            <p>You can try varying the heat source outlet temperature below for the defined cycle. Try to find the optimal value that results in the largest power production, but still results in feasible temperature profiles (i.e., the working fluid and heat source temperature profiles cannot cross each other). Start at the highest value and see what happens as you reduce it.</p>
+            <p>&nbsp</p>
+
+            <label for="inpt-hot-out">Heat-source outlet temperature [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-hot-out" id="inpt-hot-out" type="range" min="323" max="423" value="373" oninput="updateTooltip(this, 0)"/>
+                <span class="tooltiptext">373</span>
+            </div>
+            <p>&nbsp</p>
+            <button id="btn-hot-out" class="btn">Calculate</button>
+            <p>&nbsp</p>
+            <div id="plt-hot-out"></div>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+        <div class="body-contents">
+            <h2>Heat sink</h2>
+            <p>&nbsp</p>
+            <p>Alongside the heat source, in pocketORC the heat sink is also modelled as a fluid stream at constant pressure with a constant specific heat capacity. The required inputs are therefore the temperature of the available heat sink, the mass flow rate of the available heat sink and the specific heat capacity. Much like the heat source inputs, these parameters are likely to be defined by the application or known from the outset (e.g., ambient temperature of the available cooling stream, which may be air or water).</p>
+            <p>&nbsp</p>
+            <p>Since the mass flow rate of the working fluid, and the change in enthalpy of the working fluid within the condenser, are both known, the total thermal load rejected to the heat sink is fixed. As a result, the output from the heat sink model is the heat sink outlet temperature.</p>
+            <p>&nbsp</p>
+            <p>From the perspective of the ORC designer the goal is to ensure that the heat sink mass flow rate (i.e., the availability of the heat sink) is large enough such that there is not a large change in temperature of the heat sink fluid in the condenser. If the mass flow rate is too low, the condensation temperature of the ORC system has to be increased in order to ensure feasible temperature profiles in the heat exchanger. This would cause a reduction in the thermal efficiency of the cycle.</p>
+            <p>&nbsp</p>
+            <p>Use the box below to see how the heat sink mass flow rate affects the performance of the cycle. Start with the lowest value and set what happens as you increase it.</p>
+            <p>&nbsp</p>
+
+            <label for="inpt-cold-mass">Heat-sink mass-flow rate [kg/s]:</label>
+            <div class="tooltip">
+                <input name="inpt-cold-mass" id="inpt-cold-mass" type="range" min="1" max="20" value="10" oninput="updateTooltip(this, 1)"/>
+                <span class="tooltiptext">10</span>
+            </div>
+            <p>&nbsp</p>
+            <button id="btn-cold-mass" class="btn">Calculate</button>
+            <p>&nbsp</p>
+            <div id="plt-cold-mass"></div>
+        </div>
+        <p>&nbsp</p>
+
+        <!--------------------------- Footer: --------------------------->
+        <hr><p>&nbsp</p>
+         <footer> <small>&copy; Copyright 2023, Martin T. White</small><p>&nbsp</p>
+            <small>The contribution of Piyathida Suwannakat through her summer internship funded by the Royal Academy of Engineering is also gratefully acknowledged. <a href="https://raeng.org.uk/news/academy-leverages-its-unrivalled-networks-to-secure-internships-for-eight-engineering-undergraduates">Click here for more details</a></small><p>&nbsp</p></footer>
+    </section>
+
+
+
+    <!------------------------ Functionality: sidebar ----------------------->
+    <script>
+        let arrow = document.querySelectorAll(".arrow");
+        for (var i = 0; i < arrow.length; i++) {
+            arrow[i].addEventListener("click", (e)=>{
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+            });
+        }
+
+        let sidebar = document.querySelector(".sidebar");
+        let sidebarMenu = document.querySelector(".bx-menu");
+        
+        sidebarMenu.addEventListener("click", ()=>{
+            sidebar.classList.toggle("close");
+        });
+    </script>
+    <!---------------------------- End of JS: ----------------------------->    
+    
+    
+    <py-script src="./python_html/lesson5.py"></py-script>
+
+</body>
+    
+</html>

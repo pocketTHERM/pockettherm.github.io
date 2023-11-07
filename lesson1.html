@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <title>Lesson 1</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------ Lesson1: CSS ----------------->
+    <link rel="stylesheet" href="./css/pocketTHERM.css" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <!--------------- BDN boxicon link: --------------->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script src="./js/pocketTHERM.js"></script>
+</head>
+    
+<body>
+    <py-config>
+        packages = ["numpy", "matplotlib","pandas"]
+
+        [[fetch]]
+        files = ["lesson1.py"]
+        from = 'python_html'
+        
+        [[fetch]]
+        files = ["thermo_props.py","orc_simulator.py"]
+        from = 'python_modules'        
+        
+        [[fetch]]
+        files = ["n-pentane.csv"]
+        from = 'fluids'
+        
+    </py-config>
+
+<!-------------------------- Begin: Sidebar ---------------------------->
+    <div class="sidebar">
+        <div class="logo-details">
+            <i class='bx bxl-pocket' ></i>
+            <span class="logo-name">pocketTHERM</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="./">
+                    <i class='bx bxs-home'></i>
+                    <span class="link-name">Home</span>
+                </a>
+                <ul class="sub-menu blank">
+                    <li><a href="#" class="link-name">Homepage</a></li>
+                </ul>
+            </li>
+
+            <!------------------------ Calculators: ------------------------>
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bx-math' ></i>
+                        <span class="link-name">Calculators</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">Calculators</a></li>
+                    <li><a href="./pocketORC.html">pocketORC</a><li>
+                    <li><a href="./pocketHP.html">pocketHP</a></li>
+                </ul>
+            </li>     
+
+            <!-------------------------- Lessons: -------------------------->
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bxs-book-content'></i>
+                        <span class="link-name">ORC lessons</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">ORC lessons</a></li>
+                    <li><a href="./lesson1.html">1. Saturated states</a></li>
+                    <li><a href="./lesson2.html">2. Single-phase states</a></li>
+                    <li><a href="./lesson3.html">3. Ideal and real cycles</a></li>
+                    <li><a href="./lesson4.html">4. Recuperation</a></li>
+                    <li><a href="./lesson5.html">5. Heat source and sink</a></li>
+                    <li><a href="./lesson6.html">6. Alternative cycles</a></li>
+                </ul>
+            </li>  
+        </ul>
+        <div class="profile-details">
+            <div class="profile-content"></div>
+            <div class="name-job">
+                <div class="profile-name">Dr. Martin T. White</div>
+            </div>
+            <a href="https://www.linkedin.com/in/martin-t-white"><i class='bx bxl-linkedin-square'></i></a>
+        </div>   
+    </div> 
+    <!--------------------------- END of sidebar: ---------------------------->
+
+    <!--------------------------- Homepage Content: -------------------------->
+    <section class="home-section">
+        <div class="home-content">
+            <i class="bx bx-menu"></i>
+            <h1>Lesson 1: Saturated states</h1>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="introduction">
+            <h2>Introduction</h2>
+            <p>&nbsp</p>
+            <p>This first lesson will review important concepts related to understanding the thermodynamic behaviour of working fluids under saturation conditions. Understanding this is an integral part of understanding the simulation an ORC power system.</p><p>&nbsp</p>
+            <p>It is assumed that the user already has some familiarity with important concepts, such as thermodynamic state variables (i.e., temperature, pressure, density, enthalpy, entropy) and the general operating principle of a closed-loop power cycle, such as the steam Rankine cycle.</p><p>&nbsp</p>
+            <p>The aim of this section is not to delve into detail regarding the calculation of thermodynamic properties, but to start to build up a working model of an ORC power system and introduce the key cycle variables considered within the pocketORC calculator. For the purposes of this discussion it is considered enough to understand that an equation of state essentially links all of our thermodynamic properties together, and for some known thermodynamic properties (e.g., temperature and pressure) properties such as enthalpy, entropy and density can be easily retrieved using a suitable equation of state.</p>
+            <p>&nbsp</p>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>What are saturation properties?</h2>
+            <p>&nbsp</p>
+            <p>We start by revising saturation properties. The saturation temperature is the temperature at which a fluid (at a known pressure) can exist in either a liquid or vapour state. For example, the saturation temperature of water at atmospheric pressure is 100 °C, and that is the temperature at which water boils (i.e., transitions from being a liquid to a vapour).</p>
+            <p>&nbsp</p>
+            <p>The saturation temperature depends on the fluid pressure, and a higher or lower pressure corresponds to a higher or lower saturation temperature. For example, if water is pressurised to twice atmospheric pressure it would boil at approximately 120 °C as opposed to 100 °C.</p>
+            <p>&nbsp</p>
+            <p>During the process of boiling (also referred to as evaporation), a certain amount of energy must be added to the liquid in order to transform it into vapour. And the addition of that energy is associated with an increase in the enthalpy, and entropy, of the fluid. As the fluid changes from a liquid to a vapour, its density will also reduce.</p>
+            <p>&nbsp</p>
+            <p>A fluid is said to be in a saturated liquid state when it is at the saturation temperature and saturation pressure, but is completely in a liquid state (i.e., no vapour is present). In that state, the fluid will have an associated enthalpy and entropy value.</p>
+            <p>&nbsp</p>
+            <p>Similarly, a fluid is said to be in a saturated vapour state when it is at the saturation temperature and saturation pressure, but is completely in the vapour state (i.e., no liquid is present). In this state, the fluid will also have an associated enthalpy, and entropy value, which will be higher than the saturated liquid values.</p>
+            <p>&nbsp</p>
+            <p>Thus, by knowing the properties of the saturated liquid and saturated vapour at different pressures we can start to plot the saturation curve of the fluid. Different pairs of thermodynamic properties can be used in the construction of these plots, but generally plotting in the temperature-entropy plane is most common within the ORC community.</p>
+            <p>&nbsp</p>
+            <p>Below is the saturation dome for n-pentane. Try varying the fluid pressure to see how the saturation properties vary with pressure.</p>
+            <p>&nbsp</p>
+ 
+            
+            <label for="inpt-psat-single">Fluid pressure [bar]:</label>
+            <div class="tooltip">
+                <input name="inpt-psat-single" id="inpt-psat-single" type="range" value="1" min="1" max="30" oninput="updateTooltip(this, 0)" />
+                <span class="tooltiptext">1</span>
+            </div>    
+            <button id="btn-psat-single" class="btn">Calculate</button>
+            <p>&nbsp</p>
+            <div id="plt-psat-single"> </div>
+            <p>&nbsp</p>
+        </div>          
+        
+        <hr><p>&nbsp</p>          
+                    
+        <div class="body-contents">    
+            <h2>Evaporation and condensation</h2>
+            <p>&nbsp</p>
+            <p>In order for a power cycle generate power we need to introduce a pressure difference into the system. This is done by the introduction of the pump to raise the pressure of fluid, and an expander to reduce the pressure of fluid and generate work in the process.</p>
+            <p>&nbsp</p>
+            <p>As a result we have two-pressure levels within our system. In the high-pressure side of our system, the high pressure liquid is evaporated using the available heat source, during which it is converted from a liquid to a vapour. In the low-pressure side of our system, the low pressure vapour is condensed using a suitable heat sink, during which it is converted from a vapour back into a liquid.</p>
+            <p>&nbsp</p>
+            <p>The values for the high and low pressure of our system are related to corresponding saturation temperatures. The saturation temperature associated with the high pressure level is referred to as the evaporation temperature, whilst the saturation temperature associated with the low pressure level is referred to as the condensation temperature.</p>
+            <p>&nbsp</p>
+            <p>When designing an ORC system, the condensation and evaporation conditions are variables that can be adjusted by the designer to alter the performance of the system. This introduces the first two design variables within the pocketORC: namely the <em>condensation temperature</em> and the <em>system pressure ratio</em>.</p><p>&nbsp</p>
+
+            <div class="bullet">
+                <ul>
+                    <li><p>The condensation temperature directly specifies the working fluid temperature within the condenser, which in turn defines the condensation pressure.</p></li><p>&nbsp</p>
+                    <li><p>The pressure ratio is defined as the ratio of the evaporation pressure (high pressure) to the condensation pressure (low pressure). And therefore, once the condensation pressure is known the evaporation pressure, and hence temperature, can be readily determined.</p></li><p>&nbsp</p>
+                </ul>
+            </div><p>&nbsp</p>
+
+            <label for="inpt-tcond">Condensation temperature [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-tcond" id="inpt-tcond" type="range" min="293" max="323" oninput="updateTooltip(this, 1)"/>
+                <span class="tooltiptext"></span>
+            </div>
+
+            <label for="inpt-pr">Pressure ratio [-]:</label>
+            <div class="tooltip">
+                <input name="inpt-pr" id="inpt-pr" type="range" min="1" max="20" oninput="updateTooltip(this, 2)"/>
+                <span class="tooltiptext"></span>
+            </div>
+            <button id="btn-tcond-pr" class="btn">Calculate</button>
+            <p>&nbsp</p>
+
+            <div class="graph">
+                <div id="plt-tcond-pr"> </div>
+            </div> <p>&nbsp</p>
+
+            <p>It is worth noting that other pairs of inputs could be defined instead of the condensation temperature and pressure ratio. For example, the evaporation and condensation temperatures could be directly specified, or likewise the evaporation and condensation pressures could be defined as inputs. The choice is larger a matter of preference.</p><p>&nbsp</p>
+                    
+            <p>However, here condensation temperature is selected since this parameter is generally controlled by the available heat sink and is unlikely to change significantly with the working fluid (unlike condensation pressure). The pressure ratio is a convenient parameter which direclty controls the degree to which pressure changes across the pump and turbine.</p>
+        </div>
+
+        <p>&nbsp</p>
+
+        <!--------------------------- Footer: --------------------------->
+        <hr><p>&nbsp</p>
+         <footer> <small>&copy; Copyright 2023, Martin T. White</small><p>&nbsp</p>
+            <small>The contribution of Piyathida Suwannakat through her summer internship funded by the Royal Academy of Engineering is also gratefully acknowledged. <a href="https://raeng.org.uk/news/academy-leverages-its-unrivalled-networks-to-secure-internships-for-eight-engineering-undergraduates">Click here for more details</a></small><p>&nbsp</p></footer> 
+
+    </section>
+
+
+
+    <!------------------------ Functionality: sidebar ----------------------->
+    <script>
+        let arrow = document.querySelectorAll(".arrow");
+        for (var i = 0; i < arrow.length; i++) {
+            arrow[i].addEventListener("click", (e)=>{
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+            });
+        }
+
+        let sidebar = document.querySelector(".sidebar");
+        let sidebarMenu = document.querySelector(".bx-menu");
+        
+        sidebarMenu.addEventListener("click", ()=>{
+            sidebar.classList.toggle("close");
+        });
+    </script>
+    
+    <py-script src="./python_html/lesson1.py"></py-script>
+
+</body>
+    
+</html>

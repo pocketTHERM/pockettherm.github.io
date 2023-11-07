@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <title>Lesson 2</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------ PocketORC: CSS ----------------->
+    <link rel="stylesheet" href="./css/pocketTHERM.css" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <!--------------- BDN boxicon link: --------------->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script src="./js/pocketTHERM.js"></script>
+</head>
+    
+<body>
+ 
+    <py-config>
+        packages = ["numpy", "matplotlib","pandas"]
+        
+        [[fetch]]
+        files = ["lesson2.py"]
+        from = 'python_html'
+        
+        [[fetch]]
+        files = ["thermo_props.py","orc_simulator.py"]
+        from = 'python_modules'        
+        
+        [[fetch]]
+        files = ["n-pentane.csv"]
+        from = 'fluids'
+        
+    </py-config>
+ 
+<!-------------------------- Begin: Sidebar ---------------------------->
+    <div class="sidebar">
+        <div class="logo-details">
+            <i class='bx bxl-pocket' ></i>
+            <span class="logo-name">pocketTHERM</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="./">
+                    <i class='bx bxs-home'></i>
+                    <span class="link-name">Home</span>
+                </a>
+                <ul class="sub-menu blank">
+                    <li><a href="#" class="link-name">Homepage</a></li>
+                </ul>
+            </li>
+
+            <!------------------------ Calculators: ------------------------>
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bx-math' ></i>
+                        <span class="link-name">Calculators</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">Calculators</a></li>
+                    <li><a href="./pocketORC.html">pocketORC</a><li>
+                    <li><a href="./pocketHP.html">pocketHP</a></li>
+                </ul>
+            </li>     
+
+            <!-------------------------- Lessons: -------------------------->
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bxs-book-content'></i>
+                        <span class="link-name">ORC lessons</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">ORC lessons</a></li>
+                    <li><a href="./lesson1.html">1. Saturated states</a></li>
+                    <li><a href="./lesson2.html">2. Single-phase states</a></li>
+                    <li><a href="./lesson3.html">3. Ideal and real cycles</a></li>
+                    <li><a href="./lesson4.html">4. Recuperation</a></li>
+                    <li><a href="./lesson5.html">5. Heat source and sink</a></li>
+                    <li><a href="./lesson6.html">6. Alternative cycles</a></li>
+                </ul>
+            </li>  
+        </ul>
+        <div class="profile-details">
+            <div class="profile-content"></div>
+            <div class="name-job">
+                <div class="profile-name">Dr. Martin T. White</div>
+            </div>
+            <a href="https://www.linkedin.com/in/martin-t-white"><i class='bx bxl-linkedin-square'></i></a>
+        </div>   
+    </div> 
+    <!--------------------------- END of sidebar: ---------------------------->
+
+    <!--------------------------- Homepage Content: -------------------------->
+    <section class="home-section">
+        <div class="home-content">
+            <i class="bx bx-menu"></i>
+            <h1>Lesson 2: Single-phase states</h1>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="introduction">
+            <h2>Introduction</h2>
+            <p>&nbsp</p>
+            <p>This second lesson will review important concepts related to understanding the thermodynamic behaviour of working fluids when they are in the single-phase region. For example, when the working fluid is either in a a liquid state or a vapour state. This in the context of understanding subcooled liquid and superheated states, which helps to define another two cycle variables.</p><p>&nbsp</p>
+        </div>
+        <hr><p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Subcooled and superheated states</h2>
+            <p>&nbsp</p>
+            <p>In lesson 1, we revised saturation properties, and we said that if we have a fluid at a known pressure then the saturation temperature is the temperature at which phase change occurs (i.e., the process of changing from liquid to a gas, or vice versa). However, how does the behaviour of our fluid change if the temperature is not equal to the saturation temperature?</p>
+            <p>&nbsp</p>
+            <p>Let's reconsider the example of water at atmospheric pressure, for which we already know that the saturation temperature (i.e., the boiling temperature) is 100 °C. Intuitively, we know that if the temperature is below 100 °C, we have liquid. Similarly, if the temperature is above 100 °C, we have vapour.</p>
+            <p>&nbsp</p>
+            <p>More generally, we can say that when a fluid at a known pressure is below the corresponding saturation temperature it is in a liquid state. In this case, it is referred to as a <em>subcooled liquid</em>. Similarly, if the fluid is at a temperature above the saturation temperature it is in a vapour state, and is refered to as a <em>superheated vapour</em>.</p>
+            <p>&nbsp</p>
+            <p>Use the interactive chart below to see how the properties of the fluid change as the fluid temperature is varied. This particular plot corresponds to n-pentane at a constant pressure of 5 bar. Therefore, the solid green line can be considered an <em>isobar</em> (i.e., a line of constant pressure).</p>
+            <p>&nbsp</p>  
+            
+            <label for="inpt-sub-super">Fluid temperature [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-sub-super" id="inpt-sub-super" type="range" value="348" min="273" max="423" oninput="updateTooltip(this, 0)"  />
+                <span class="tooltiptext">348</span>
+            </div><p>&nbsp</p>
+            <button id="btn-sub-super" class="btn">Calculate</button>
+            <p>&nbsp</p>
+       
+            <div id="plt-sub-super"></div>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+        
+        <div class="body-contents">
+            
+            <h2>Pump and expander inlet conditions</h2>
+            <p>&nbsp</p>
+            <p>Our understanding of subcooled liquid and superheated vapour now allows us to introduce another two cycle variables. These are the <em>degree of subcooling at the pump inlet</em> and the <em>degree of superheating at the expander inlet</em>. These two parameters control the temperature of the fluid at the inlet to the pump and the temperature of the fluid at the inlet to the expander.</p>
+            <p>&nbsp</p>
+            <p>The <em>degree of subcooling</em> is defined as the difference between the defined condensation temperature and the desired pump inlet temperature. So, if the condensation temperature was set to 313 K, and the degree of subcooling set to 2 K, then the pump inlet temprature would be 311 K. In general, there is limited thermodynamic benefit to subcooling, but it is ofen a requirement to subcool by a few degrees to avoid cavitation (i.e., the formation of vapour bubbles) within the pump.</p>
+            <p>&nbsp</p>
+            <p>The <em>degree of superheating</em> is similarly defined as the difference between the expander inlet temprature and the corresponding evaporation temperature. So, if the evaporation temperature was 423 K, and the degree of superheat was 10 K, then the expander inlet temperature would be 433 K. It is harder to make a general statement about the optimal superheat as it depends on the working fluid and the avilable heat source. It is therefore a variable to be considered in the design process.</p>
+            <p>&nbsp</p>
+
+            <p>Let's add our two new variables into the mix:</p>
+            <p>&nbsp</p> 
+
+            <label for="inpt-tcond">Condensation temperature [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-tcond" id="inpt-tcond" type="range" value="308" min="293" max="323" oninput="updateTooltip(this, 1)" />
+                <span class="tooltiptext">308</span>
+            </div>
+            <label for="inpt-subcool">Subcooling at pump inlet [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-subcool" id="inpt-subcool" type="range" value="10" min="0" max="20"  oninput="updateTooltip(this, 2)" />
+                <span class="tooltiptext">10</span>
+            </div>                       
+            <label for="inpt-pr">Pressure ratio [-]:</label>
+            <div class="tooltip">
+                <input name="inpt-pr" id="inpt-pr" type="range" value="" min="1" max="20" oninput="updateTooltip(this, 3)" />
+                <span class="tooltiptext">10</span>
+            </div>
+            <label for="inpt-superheat">Superheating at turbine inlet [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-superheat" id="inpt-superheat" type="range" value="10" min="0" max="20"  oninput="updateTooltip(this, 4)"/>
+                <span class="tooltiptext">10</span>
+            </div>
+            <p>&nbsp</p>
+            <button id="btn-4-variables" class="btn">Calculate</button>
+            <p>&nbsp</p>
+                <div id="plt-4-variables"></div>
+        </div>
+        <p>&nbsp</p>
+        
+        <!--------------------------- Footer: --------------------------->
+        <hr><p>&nbsp</p>
+         <footer> <small>&copy; Copyright 2023, Martin T. White</small><p>&nbsp</p>
+            <small>The contribution of Piyathida Suwannakat through her summer internship funded by the Royal Academy of Engineering is also gratefully acknowledged. <a href="https://raeng.org.uk/news/academy-leverages-its-unrivalled-networks-to-secure-internships-for-eight-engineering-undergraduates">Click here for more details</a></small><p>&nbsp</p></footer> 
+        
+    </section>
+
+    <!------------------------ Functionality: sidebar ----------------------->
+    <script>
+        let arrow = document.querySelectorAll(".arrow");
+        for (var i = 0; i < arrow.length; i++) {
+            arrow[i].addEventListener("click", (e)=>{
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+            });
+        }
+
+        let sidebar = document.querySelector(".sidebar");
+        let sidebarMenu = document.querySelector(".bx-menu");
+        
+        sidebarMenu.addEventListener("click", ()=>{
+            sidebar.classList.toggle("close");
+        });
+    </script>
+
+    
+    <py-script src="./python_html/lesson2.py"></py-script>
+
+</body>
+    
+</html>

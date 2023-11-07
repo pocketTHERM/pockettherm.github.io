@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+    
+<head>
+    <title>Lesson 3</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <!------------------ PocketORC: CSS ----------------->
+    <link rel="stylesheet" href="./css/pocketTHERM.css" />
+    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <!--------------- BDN boxicon link: --------------->
+    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script src="./js/pocketTHERM.js"></script>
+</head>
+    
+<body>
+ 
+    <py-config>
+        packages = ["numpy", "matplotlib","pandas"]
+        
+        [[fetch]]
+        files = ["lesson3.py"]
+        from = 'python_html'
+        
+        [[fetch]]
+        files = ["thermo_props.py","orc_simulator.py"]
+        from = 'python_modules'        
+        
+        [[fetch]]
+        files = ["n-pentane.csv"]
+        from = 'fluids'
+        
+    </py-config>
+
+<!-------------------------- Begin: Sidebar ---------------------------->
+    <div class="sidebar">
+        <div class="logo-details">
+            <i class='bx bxl-pocket' ></i>
+            <span class="logo-name">pocketTHERM</span>
+        </div>
+        <ul class="nav-links">
+            <li>
+                <a href="./">
+                    <i class='bx bxs-home'></i>
+                    <span class="link-name">Home</span>
+                </a>
+                <ul class="sub-menu blank">
+                    <li><a href="#" class="link-name">Homepage</a></li>
+                </ul>
+            </li>
+
+            <!------------------------ Calculators: ------------------------>
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bx-math' ></i>
+                        <span class="link-name">Calculators</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">Calculators</a></li>
+                    <li><a href="./pocketORC.html">pocketORC</a><li>
+                    <li><a href="./pocketHP.html">pocketHP</a></li>
+                </ul>
+            </li>     
+
+            <!-------------------------- Lessons: -------------------------->
+            <li>
+                <div class="icon-link">
+                    <a href="#">
+                        <i class='bx bxs-book-content'></i>
+                        <span class="link-name">ORC lessons</span>
+                    </a>
+                    <i class='bx bx-chevron-down arrow'></i>
+                </div>
+                <ul class="sub-menu">
+                    <li><a href="#" class="link-name">ORC lessons</a></li>
+                    <li><a href="./lesson1.html">1. Saturated states</a></li>
+                    <li><a href="./lesson2.html">2. Single-phase states</a></li>
+                    <li><a href="./lesson3.html">3. Ideal and real cycles</a></li>
+                    <li><a href="./lesson4.html">4. Recuperation</a></li>
+                    <li><a href="./lesson5.html">5. Heat source and sink</a></li>
+                    <li><a href="./lesson6.html">6. Alternative cycles</a></li>
+                </ul>
+            </li>  
+        </ul>
+        <div class="profile-details">
+            <div class="profile-content"></div>
+            <div class="name-job">
+                <div class="profile-name">Dr. Martin T. White</div>
+            </div>
+            <a href="https://www.linkedin.com/in/martin-t-white"><i class='bx bxl-linkedin-square'></i></a>
+        </div>   
+    </div> 
+    <!--------------------------- END of sidebar: ---------------------------->
+    <!--------------------------- Homepage Content: -------------------------->
+    <section class="home-section">
+        <div class="home-content">
+            <i class="bx bx-menu"></i>
+            <h1>Lesson 3: Ideal and real cycles</h1>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+
+        <div class="introduction">
+            <h2>Introduction</h2>
+            <p>&nbsp</p>
+            <p>In lessons 1 and 2 we have introduced four thermodynamic variables which define the inlet temperatures and pressures at our pump and expander. This gives us all the information we need to start evaluating the performance of the power cycle. In this lesson we will first evaluate an ideal cycle, before considering more realistic cycles where component performance is considered.</p>
+            <p>&nbsp</p>
+            <p>Here we focus on a qualitative understanding of the modelling process. The mathematical calculations can be found in the supporting documentation.</p>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Ideal cycle</h2>
+            <p>&nbsp</p>
+            <p>Our four thermodynamic variables introduced so far, namely the condensation temperature, degree of subcooling at the pump inlet, the pressure ratio, and the degree of superheating at the expander inlet, define the thermodynamic properties at the inlet to the pump and the inlet to the expander.</p>
+            <p>&nbsp</p>
+            <p>Moreover, we generally assume that the pressure drop during our evaporation and condensation processes is negligible. Therefore, our evaporation and condensation processes are assumed to be <em>isobaric</em>. This means that the pump outlet pressure is equal to the expander inlet pressure. Similarly, the expander outlet pressure is equal to the pump inlet pressure.</p>
+            <p>&nbsp</p>
+            <p>In an ideal cycle the pressure increase across the pump, and the pressure drop across the expander, are both assumed to be ideal, reversible processes. This means there is no loss within these processes, and the compression and expansion are said to be <em>isentropic</em>. This means that entropy remains constant. Subsequently, since we know the pressure and entropy values after our ideal compression and expansion processes we can also calculate the temperature and enthalpy at the outlet of the pump and expander.</p><p>&nbsp</p>
+            <p>From the first law of thermodynamics, the ideal specific pump work can be related to the change in enthalpy across the pump. Similarly, the ideal specific expander work can be related to the change in enthalpy across the expander. Finally, the amount of  heat added to the cycle in the evaporator on a per mass basis can be related to the change in enthalpy between the pump outlet and expander inlet.</p><p>&nbsp</p>
+            <p>At this point we can introduce our first performance metric, which is the thermodynamic cycle efficiency. This is defined in terms of how much work the cycle produces, compared to how much heat goes in. The net work produced by the cycle is the difference between the work produced by the expander and the work consumed by the pump.</p><p>&nbsp</p>
+            <p>Use the calculator below to see how our four design variables influence the cycle efficiency. Here a representative heat source at a fixed temperature of 150 °C, and a heat sink at a fixed temperature of 20 °C, are introduced. See how high you can get the efficiency without the cycle exceeding these temperature limits.</p>
+            <p>&nbsp</p>
+
+    
+            <label for="inpt-tcond-ideal">Condensation temperature [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-tcond-ideal" id="inpt-tcond-ideal" type="range" value="308" min="293" max="323" oninput="updateTooltip(this, 0)" />
+                <span class="tooltiptext">308</span>  
+            </div>
+                        
+            <label for="inpt-subcool-ideal">Subcooling at pump inlet [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-subcool-ideal" id="inpt-subcool-ideal" type="range" min="0" max="20" value="10" oninput="updateTooltip(this, 1)"/>
+                <span class="tooltiptext">10</span>
+            </div>
+
+            <label for="inpt-pr-ideal">Pressure ratio [-]:</label>
+            <div class="tooltip">
+                <input name="inpt-pr-ideal" id="inpt-pr-ideal" type="range" min="1" max="30" value="15" oninput="updateTooltip(this, 2)"/>
+                <span class="tooltiptext">15</span>
+            </div>
+            
+            <label for="inpt-superheat-ideal">Superheating at turbine inlet [K]:</label>
+            <div class="tooltip">
+                <input name="inpt-superheat-ideal" id="inpt-superheat-ideal" type="range" min="0" max="20" value="10" oninput="updateTooltip(this, 3)"/>
+                <span class="tooltiptext">10</span>
+            </div>
+ 
+            <p>&nbsp</p>
+            <button id="btn-ideal-cycle" class="btn">Calculate</button>
+            <p>&nbsp</p>
+            <div id="plt-ideal-cycle"></div>
+            <p>&nbsp</p>
+        </div>
+        <hr>
+        <p>&nbsp</p>
+
+        <div class="body-contents">
+            <h2>Real Cycles</h2>
+            <p>&nbsp</p>
+            <p>In the ideal cycle we assumed that the compression and expansion processes are isentropic, and therefore there is no loss of energy within the pump or expander (for example, due to friction). However, in a more practical real cycle there will be losses. We account for this with the introduction of the pump and expander isentropic efficiencies, which are inputs into the pocketORC calculator.</p><p>&nbsp</p>
+            <p>Within the pump, which is designed to increase the pressure of the fluid, any losses will increase the energy consumed by the pump. This is because the pump has to work harder in order to overcome those losses, whilst achieving the same target pressure. Therefore the pump isentropic efficiency is defined as the ratio of the isentropic compression work to the real compression work. As such, if we know the ideal work, and we have defined the efficiency, the real pump work can be easily calculated.</p><p>&nbsp</p>
+            <p>Within the expander, the opposite is true. The losses that take place during the expansion process means that we are able to general less useful work than the ideal case. In this case, the expander isentropic efficiency is defined as the ratio of the real expansion work to the isentropic expansion work. Again, by knowing the ideal work and having defined an isentropic efficiency, we can easily calculate the real expander work.</p><p>&nbsp</p>
+            <p>The isentropic efficiencies of the pump and expander will depend on many factors, including the type of pump or expander, the power rating, the operating conditions, and also whether the component is operating at a design or off-design condition. However, within design-point cycle analysis it is generally acceptable to consider the pump and turbines with fixed isentropic efficiencies. However, in defining those input  values some consideration of power rating (i.e., scale) and the type of component being used is suggested. For example, smaller-scale applications are generally associated with lower isentropic efficiencies, whilst turbo-expanders are likely to have larger efficiencies when compared to volumetric expanders.</p><p>&nbsp</p>
+            <p>Use the calculator below to see how the pump and expander isentropic efficiencies affect the overall performance of the cycle. Start with values of 100% for both and see how the cycle efficiency reduces as the component efficiencies reduce. Also note what happens to the pump and expansion processes, as observed in the temperature-entropy plot.</p><p>&nbsp</p>
+
+            <label for="inpt-etap">Pump isentropic efficiency [%]:</label>
+            <div class="tooltip">
+                <input name="inpt-etap" id="inpt-etap" type="range" min="50" max="100" value="75" oninput="updateTooltip(this, 4)"/>
+                <span class="tooltiptext">75</span>
+            </div>
+  
+            <label for="inpt-etae">Expander isentropic efficiency [%]:</label>
+            <div class="tooltip">
+                <input name="inpt-etae" id="inpt-etae" type="range" min="50" max="100" value="75" oninput="updateTooltip(this, 5)"/>
+                <span class="tooltiptext">75</span>
+            </div>
+         
+            <p>&nbsp</p>
+            <button id="btn-real-cycle" class="btn">Calculate</button>
+            <p>&nbsp</p>
+            <div id="plt-real-cycle"></div>
+            <p>&nbsp</p>
+        </div>
+
+        <!--------------------------- Footer: --------------------------->
+        <hr><p>&nbsp</p>
+        <footer> <small>&copy; Copyright 2023, Martin T. White</small><p>&nbsp</p>
+            <small>The contribution of Piyathida Suwannakat through her summer internship funded by the Royal Academy of Engineering is also gratefully acknowledged. <a href="https://raeng.org.uk/news/academy-leverages-its-unrivalled-networks-to-secure-internships-for-eight-engineering-undergraduates">Click here for more details</a></small><p>&nbsp</p></footer> 
+        
+    </section>
+
+
+
+    <!------------------------ Functionality: sidebar ----------------------->
+    <script>
+        let arrow = document.querySelectorAll(".arrow");
+        for (var i = 0; i < arrow.length; i++) {
+            arrow[i].addEventListener("click", (e)=>{
+            let arrowParent = e.target.parentElement.parentElement;
+            arrowParent.classList.toggle("showMenu");
+            });
+        }
+
+        let sidebar = document.querySelector(".sidebar");
+        let sidebarMenu = document.querySelector(".bx-menu");
+        
+        sidebarMenu.addEventListener("click", ()=>{
+            sidebar.classList.toggle("close");
+        });
+    </script>
+    <!---------------------------- End of JS: ------------------------------->
+
+
+    <py-script src="./python_html/lesson3.py"></py-script>
+
+</body>
+    
+</html>
