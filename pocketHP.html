@@ -105,8 +105,6 @@
         <hr><p>&nbsp</p>
         
         <div class="introduction">
-            <p style="color:rgb(48,76,35); font-size:16px; font-weight:bold;">pocketHP is still under development. Please proceed with caution.</p>
-            <p>&nbsp</p>
             <h2>Introduction</h2>
             <p>&nbsp</p>
             <p>pocketHP is a steady-state design model for heat pump systems that operates straight from the browser (and hence from the phone in your pocket). The underlying model is written in the Python programming language and the PyScript framework is used to call Python code directly from HTML.</p>
@@ -166,7 +164,7 @@
 
                     <label for="heat-source-heat-capacity">Specific-heat capacity [J/(kg K)]:</label>
                     <div class="fixed">
-                        <input name="heat-source-heat-capacity" id="heat-source-heat-capacity" type="text" min="0" max="10000" required value=1000>
+                        <input name="heat-source-heat-capacity" id="heat-source-heat-capacity" type="text" min="0" max="10000" required value=4200>
                         <span class="comment">Please select a value between 0 and 10000</span>
                     </div>    
                 </div>
@@ -195,7 +193,7 @@
                     <div class="form-group">
                         <label for="heat-sink-heat-capacity">Specific-heat capacity [J/(kg K)]:</label>
                         <div class="fixed">
-                            <input name="heat-sink-heat-capacity" id="heat-sink-heat-capacity" type="text" min="0" max="10000" required value=1000>
+                            <input name="heat-sink-heat-capacity" id="heat-sink-heat-capacity" type="text" min="0" max="10000" required value=4200>
                             <span class="comment">Please select a value between 0 and 10000</span>
                         </div>
                     </div>
@@ -251,7 +249,7 @@
 
                 <label for="pressure-ratio">Pressure ratio [-]:</label>
                 <div class="fixed">
-                    <input name="pressure-ratio" id="pressure-ratio" type="text" min="1" max="50" required value=5>
+                    <input name="pressure-ratio" id="pressure-ratio" type="text" min="1" max="50" required value=7>
                     <span class="comment">Please select a value between 1 and 50</span>
                 </div>
 
@@ -269,7 +267,7 @@
 
                 <label for="heat-source-outlet">Heat-source outlet temperature [K]:</label>
                 <div class="fixed">
-                    <input name="heat-source-outlet" id="heat-source-outlet" type="text" min="283" max="673" required value=303>
+                    <input name="heat-source-outlet" id="heat-source-outlet" type="text" min="283" max="673" required value=318>
                     <span class="comment">Please select a value between 283 and 673</span>
                 </div>
             </div>
