@@ -111,7 +111,11 @@
             <p>&nbsp</p>
             <p>pocketHP is intended to be used as a teaching aid to explore basic principles relating to heat pump systems, whilst also serving as a pocket calculator for people working within the heat pump field. The current version combines the Peng-Robinson equation of state with a thermodynamic model of a heat pump system with an internal heat exchanger, and discretised heat exchanger sizing models. The user can vary cycle variables via the web form which returns performance data. The model enables single-point calculation, or parametric studies of a single variable. </p>
             <p>&nbsp</p>
-            <p>The pocketHP page is still under development and lessons and documentation are not yet available. However, the pocketORC lessons and documentation should help give some insight to the underlying mechanics of the calculator.</p>
+            <p>Supporting documentation and lessons for pocketHP are still under development and not yet available. However, the pocketORC lessons and documentation should help give some insight to the underlying mechanics of the calculator.</p>
+            <p>&nbsp</p>
+            <h4>A note on thermodynamic property calculation</h4>
+            <p>&nbsp</p>
+            <p>Within pocketORC and pocketHP, the thermodynamic properties of the working fluid are calculated using a specifically designed module based on the Peng-Robinson equation of state. Although this is not as accurate as state-of-the-art multi-parameter equations of state commonly used (e.g., <a href="http://www.coolprop.org/">CoolProp</a> and <a href="https://www.nist.gov/srd/refprop">REFPROP</a>), the model is known to provide reasonable predictions for fluid properties, particularly in the vapour-phase region. The level of accuracy provided by the Peng-Robinson is considered sufficient for a tool whose primary purpose is teaching. If using the tool for any other purpose, please proceed with caution and make sure to verify any calculations with results obtained using more a well-suited equation of state.</p>
             <p>&nbsp</p>
         </div>
         <hr>
