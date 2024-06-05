@@ -2,9 +2,17 @@
 # 
 # python module for thermodynamic property calculation. this module 
 # contains a class that can be used to predict fluid properties using an
-# in-house Peng-Robinson equation of state.
+# in-house Peng-Robinson equation of state. a separate class is available
+# that interfaces with the CoolProp package using the same syntax to allow
+# easy transition between different models in external scripts.
 # 
 #   example:
+#
+#     # using CoolProp get properties at given temp. & press.:
+#     fluid = thermo_props.coolprop_fluid(fluid,backend)
+#     fluid.tpflash(t,p)
+#     fluid.fluid.hmass()
+#     fluid.fluid.smass()
 #
 #     # using Peng-Robinson get properties at given temp. & press.:
 #     fluid = thermo_props.pr_fluid(name,tc,pc,om,cp,tr,vr,wm)
@@ -30,14 +38,32 @@
 #             saturation_t(self,t,q)
 #             saturation_p(self,p,q)
 #             saturation_curve(self,n,*args)
-#             spinodal_derivatives(self,t,v)
-#             spinodal_density(self,t,phase,*args)
-#             spinodal_curve(self,n,*args)
 #             soundspeed_mol(self,t,v)
 # 
+#   class:  coolprop_fluid
+#       class for calling a fluid defined in CoolProp. can be setup to
+#       call using either the CoolProp or the REFPROP backend.
+#             __init__(self,name,backend,*args)
+#             tdflash(self,t,d,*args)
+#             tpflash(self,t,p,*args) 
+#             pdflash(self,p,d,*args)
+#             psflash_mol(self,p,s,*args)
+#             phflash_mol(self,p,h,*args)
+#             hsflash_mol(self,h,s,*args)  
+#             pdflash_mass(self,p,d,*args)
+#             psflash_mass(self,p,s,*args)
+#             phflash_mass(self,p,h,*args)
+#             tsflash_mass(self,t,s,*args)
+#             hsflash_mass(self,h,s,*args)
+#             duflash_mass(self,d,u,*args)
+#             hsflash_mass_backup(self,h,s,p_guess1,p_guess2)
+#             saturation_t(self, t, q)
+#             saturation_p(self, p, q)
+#             saturation_curve(self, n *args)
 # =========================================================================
 
 import numpy as np
+#import CoolProp.CoolProp as CoolProp
 
 # =========================================================================
 # define generic fluid class for use with Peng-Robinson fluid. Required so
@@ -115,7 +141,7 @@ class pr_fluid:
         self.hmass_v   = np.nan
         self.rhomass_v = np.nan
 
-        # initiate fluid substructre:
+        # initiate fluid substructure:
         self.fluid = fluid()
         
         # calulate departure function of reference parameters:
@@ -248,33 +274,39 @@ class pr_fluid:
                 self.saturation_p(p,0)
                 t1 = self.fluid.T()
                 h1 = self.fluid.hmolar()
+
+                # set second temperature to a value below initial guess:
+                t2 = t1 - 25
+
             elif (region == 1):
                 # use saturated vapour conditions:
                 self.saturation_p(p,1)
                 t1 = self.fluid.T()
                 h1 = self.fluid.hmolar()
+
+                # set second temperature to a value above initial guess:
+                t2 = t1 + 25
+
             elif (region == 2):
                 # determine conditions at critical temperature:
                 t1 = self.tc
                 self.tpflash(t1,p,region)
                 h1 = self.fluid.hmolar()
+
+                # set second temperature to a value above initial guess:
+                t2 = t1 + 25
         else: 
             # initial guess provided
             t1 = args[0][0]
-            h1 = args[0][2]
-           
-        # set next guess for temperature:
-        if (region == 0):
-            t2 = t1 - 25
-        elif (region == 1):
-            t2 = t1 + 25
-        elif (region == 2):
-            t2 = t1 + 25
+            h1 = args[0][2] * self.wm 
+
+	    # second temperature:
+            t2 = args[1]
 
         # compute properties at next temperature guess:
         self.tpflash(t2,p,region)
         h2 = self.fluid.hmolar()
-   
+ 
         # use secant method to determine temperature: 
         while (abs(h1 - h2) > 1):
             m  = (t2 - t1)/(h2 - h1)
@@ -300,28 +332,34 @@ class pr_fluid:
                 self.saturation_p(p,0)
                 t1 = self.fluid.T()
                 s1 = self.fluid.smolar()
+
+                # set second temperature to a value below initial guess:
+                t2 = t1 - 25
+
             elif (region == 1):
                 # use saturated vapour conditions:
                 self.saturation_p(p,1)
                 t1 = self.fluid.T()
                 s1 = self.fluid.smolar()
+
+                # set second temperature to a value above initial guess:
+                t2 = t1 + 25
+
             elif (region == 2):
                 # determine conditions at critical temperature:
                 t1 = self.tc
                 self.tpflash(t1,p,region)
                 s1 = self.fluid.smolar()
+
+                # set second temperature to a value above initial guess:
+                t2 = t1 + 25
         else:
             # initial guess provided
             t1 = args[0][0]
-            s1 = args[0][3]
+            s1 = args[0][3] * self.wm
 
-        # set next guess for temperature:
-        if (region == 0):
-            t2 = t1 - 25
-        elif (region == 1):
-            t2 = t1 + 25
-        elif (region == 2):
-             t2 = t1 + 25
+            # second temperature:
+            t2 = args[1]
 
         # compute properties at next temperature guess:
         self.tpflash(t2,p,region)
@@ -642,6 +680,145 @@ class pr_fluid:
         # return speed of sound:
         return a
     
+# =========================================================================
+# class for a CoolProp fluid using various backends
+class coolprop_fluid:    
+    
+    #######################################################################
+    # initialisation of class: 
+    def __init__(self,name,backend):
+
+        # create abstract state:
+        self.fluid = CoolProp.AbstractState(backend,name)
+
+        # append fluid parameters:
+        self.pc = self.fluid.p_critical()
+        self.tc = self.fluid.T_critical()
+        self.wm = self.fluid.molar_mass()*1000
+        
+        # saturation properties (single call for both phases):     
+        self.tsat      = np.nan
+        self.psat      = np.nan
+        self.smass_l   = np.nan
+        self.hmass_l   = np.nan
+        self.rhomass_l = np.nan
+        self.smass_v   = np.nan
+        self.hmass_v   = np.nan
+        self.rhomass_v = np.nan
+        
+    #######################################################################
+    # direct CoolProp calls:
+    def tdflash(self,t,d,*args):
+        self.fluid.update(CoolProp.DmassT_INPUTS,d,t)
+    def tpflash(self,t,p,*args): 
+        self.fluid.update(CoolProp.PT_INPUTS,p,t)
+    def pdflash(self,p,d,*args):
+        self.fluid.update(CoolProp.DmassP_INPUTS,d,p)
+    def psflash_mol(self,p,s,*args):
+        self.fluid.update(CoolProp.PSmolar_INPUTS,p,s)
+    def phflash_mol(self,p,h,*args):
+        self.fluid.update(CoolProp.HmolarP_INPUTS,h,p)
+    def hsflash_mol(self,h,s,*args):
+        self.fluid.update(CoolProp.HmolarSmolar_INPUTS,h,s)    
+    def pdflash_mass(self,p,d,*args):
+        self.fluid.update(CoolProp.DmassP_INPUTS,d,p)
+    def psflash_mass(self,p,s,*args):
+        self.fluid.update(CoolProp.PSmass_INPUTS,p,s)
+    def phflash_mass(self,p,h,*args):
+        self.fluid.update(CoolProp.HmassP_INPUTS,h,p)
+    def hsflash_mass(self,h,s,*args):
+        self.fluid.update(CoolProp.HmassSmass_INPUTS,h,s)
+            
+    ##########################################################################
+    def saturation_t(self,t,q,*args):
+        if (q != 2): # return specified phase
+            self.fluid.update(CoolProp.QT_INPUTS,q,t)
+        elif (q == 2): # return liquid and vapour properties
+            
+            # saturated liquid properties:
+            self.fluid.update(CoolProp.QT_INPUTS,0,t)
+            #self.hmolar_l  = self.fluid.hmolar()
+            #self.smolar_l  = self.fluid.smolar()
+            self.tsat      = t
+            self.psat      = self.fluid.p()
+            self.hmass_l   = self.fluid.hmass()
+            self.smass_l   = self.fluid.smass()
+            self.rhomass_l = self.fluid.rhomass()
+
+            # saturated vapour properties:
+            self.fluid.update(CoolProp.QT_INPUTS,1,t)    
+            #self.hmolar_v  = self.fluid.hmolar()
+            #self.smolar_v  = self.fluid.smolar()
+            self.hmass_v   = self.fluid.hmass()
+            self.smass_v   = self.fluid.smass()
+            self.rhomass_v = self.fluid.rhomass()
+            
+    ##########################################################################
+    def saturation_p(self,p,q,*args): 
+        if (q != 2): # return specified phase
+            self.fluid.update(CoolProp.PQ_INPUTS,p,q)
+        elif (q == 2): # return liquid and vapour properties
+            
+            # saturated liquid properties:
+            self.fluid.update(CoolProp.PQ_INPUTS,p,0)
+            #self.hmolar_l  = self.fluid.hmolar()
+            #self.smolar_l  = self.fluid.smolar()
+            self.tsat      = self.fluid.T()
+            self.psat      = p
+            self.hmass_l   = self.fluid.hmass()
+            self.smass_l   = self.fluid.smass()
+            self.rhomass_l = self.fluid.rhomass()
+
+            # saturated vapour properties:
+            self.fluid.update(CoolProp.PQ_INPUTS,p,1)
+            #self.hmolar_v  = self.fluid.hmolar()
+            #self.smolar_v  = self.fluid.smolar()
+            self.hmass_v   = self.fluid.hmass()
+            self.smass_v   = self.fluid.smass()
+            self.rhomass_v = self.fluid.rhomass()
+            
+    ###########################################################################
+    # construct saturation curve
+    def saturation_curve(self,n,*args):
+
+        # set minimum pressure:
+        if (len(args) == 1):
+            pmin = args[0]
+        else:
+            pmin = 1e3 
+
+        # define pressure array:
+        psat  = np.linspace(pmin,pmax,n)
+        
+        # initialise arrays:
+        Tsatl = []
+        Tsatv = []
+        ssatl = [] 
+        ssatv = []
+        hsatl = []
+        hsatv = []
+
+        # compute saturation properties:
+        for i in range(n):
+
+            # saturated liquid properties:
+            self.saturation_p(psat[i],0)
+            ssatl.append(self.fluid.smass())
+            hsatl.append(self.fluid.hmass())
+            Tsatl.append(self.fluid.T())
+
+            # saturated vapour properties:
+            self.saturation_p(psat[i],1)
+            ssatv.append(self.fluid.smass())
+            hsatv.append(self.fluid.hmass())            
+            Tsatv.append(self.fluid.T())
+
+        # combine liquid and vapour properties:
+        self.Tsat = np.concatenate([Tsatl,np.flip(Tsatv)])
+        self.psat = np.concatenate([psat ,np.flip(psat)])
+        self.hsat = np.concatenate([hsatl,np.flip(hsatv)])
+        self.ssat = np.concatenate([ssatl,np.flip(ssatv)])
+
 # =========================================================================
 # END OF FILE
 # =========================================================================

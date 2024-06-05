@@ -193,18 +193,19 @@ def cycle_state_points(flu,t_cond,dt_sc,pr,exp_in,thi,etap,etat,effr):
 def compression(flu,props_in,region,p_out,eta,sat):
 
     # unpack compressor inlet conditions:
+    T_in = props_in[0]
     h_in = props_in[2]
     s_in = props_in[3]
     
     # calculate outlet enthalpy after isentropic compression:
-    flu.psflash_mass(p_out,s_in,region,sat)
+    flu.psflash_mass(p_out,s_in,region,sat,T_in)
     h_out_s = flu.fluid.hmass()
 
     # calculate oulet enthalpy after real compression: 
     h_out = h_in + (h_out_s - h_in)/eta
 
     # calculate thermodynamic properties at outlet of compressor:
-    flu.phflash_mass(p_out,h_out,region,sat)
+    flu.phflash_mass(p_out,h_out,region,sat,T_in)
     t_out = flu.fluid.T()
     s_out = flu.fluid.smass()
     d_out = flu.fluid.rhomass()
@@ -217,6 +218,7 @@ def compression(flu,props_in,region,p_out,eta,sat):
 def expansion(flu,props_in,region,p_out,eta,satl,satv):
 
     # unpack expander inlet conditions:
+    T_in = props_in[0]
     h_in = props_in[2]
     s_in = props_in[3]
 
@@ -226,7 +228,7 @@ def expansion(flu,props_in,region,p_out,eta,satl,satv):
 
     # calculate outlet enthalpy after isentropic expansion:
     if (s_in > ssatv):
-        flu.psflash_mass(p_out,s_in,region,satv)
+        flu.psflash_mass(p_out,s_in,region,satv,T_in)
         h_out_s = flu.fluid.hmass()
     else:
         x_s = (s_in - ssatl)/(ssatv - ssatl)
@@ -237,7 +239,7 @@ def expansion(flu,props_in,region,p_out,eta,satl,satv):
 
     # calculate thermodynamic properties at outlet of expander:
     if (h_out > hsatv):
-        flu.phflash_mass(p_out,h_out,region,satv)
+        flu.phflash_mass(p_out,h_out,region,satv,T_in)
         t_out = flu.fluid.T()
         s_out = flu.fluid.smass()
         d_out = flu.fluid.rhomass()
@@ -290,11 +292,11 @@ def recuperation(
     hc_out = hc_in + dh
 
     # calculate outlet properties:
-    flu.phflash_mass(ph_in,hh_out,region_hot,sat_hot)
+    flu.phflash_mass(ph_in,hh_out,region_hot,sat_hot,th_in)
     th_out = flu.fluid.T()
     sh_out = flu.fluid.smass()
     dh_out = flu.fluid.rhomass()
-    flu.phflash_mass(pc_in,hc_out,region_cld,sat_cld)
+    flu.phflash_mass(pc_in,hc_out,region_cld,sat_cld,tc_in)
     tc_out = flu.fluid.T()
     sc_out = flu.fluid.smass()
     dc_out = flu.fluid.rhomass()
@@ -470,7 +472,7 @@ def UA_sizing_recup(
     t_hot[0]   = props_hot[0,1]
     t_hot[n-1] = props_hot[0,0]
     for i in range(1,n-1,1):
-        flu.phflash_mass(props_hot[1,0],h_hot[i],region_hot,sat_hot)
+        flu.phflash_mass(props_hot[1,0],h_hot[i],region_hot,sat_hot,t_hot[i-1])
         t_hot[i] = flu.fluid.hmass()
 
     # compute pinch points:
