@@ -5,33 +5,16 @@
     <title>Lesson 5</title>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-
     <!------------------ PocketORC: CSS ----------------->
     <link rel="stylesheet" href="./css/pocketTHERM.css" />
-    <link rel="stylesheet" href="https://pyscript.net/latest/pyscript.css" />
+    <link rel="stylesheet" href="https://pyscript.net/releases/2024.11.1/core.css">
     <!--------------- BDN boxicon link: --------------->
     <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
-    <script defer src="https://pyscript.net/latest/pyscript.js"></script>
+    <script type="module" src="https://pyscript.net/releases/2024.11.1/core.js"></script>
     <script src="./js/pocketTHERM.js"></script>
 </head>
     
 <body>
-    <py-config>
-        packages = ["numpy", "matplotlib","pandas"]
-        
-        [[fetch]]
-        files = ["lesson5.py"]
-        from = 'python_html'
-        
-        [[fetch]]
-        files = ["thermo_props.py","orc_simulator.py"]
-        from = 'python_modules'        
-        
-        [[fetch]]
-        files = ["n-pentane.csv"]
-        from = 'fluids'
-        
-    </py-config>
 
 <!-------------------------- Begin: Sidebar ---------------------------->
     <div class="sidebar">
@@ -192,8 +175,7 @@
     </script>
     <!---------------------------- End of JS: ----------------------------->    
     
-    
-    <py-script src="./python_html/lesson5.py"></py-script>
+    <script type="py" src="./python_html/lesson5.py" config="pyscript.json"></script>
 
 </body>
     

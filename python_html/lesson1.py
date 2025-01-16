@@ -1,9 +1,11 @@
-from js import document
+from pyscript import document
+from pyscript import display
+from js import console
 from pyodide.ffi import create_proxy 
-import thermo_props
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import thermo_props
 
 # initialise figures:
 fig, ax = plt.subplots()
@@ -13,7 +15,7 @@ display(fig,target="plt-psat-single")
 display(fig,target="plt-tcond-pr")
 
 plt.tight_layout()
-plt.close(fig)
+#plt.close(fig)
 
 # fontsize for in-figure text:
 fs = 7
@@ -22,8 +24,18 @@ fs = 7
 fluid = thermo_props.pr_fluid("n-pentane",469.7,3.3675e6,0.2510,
                                [12.9055,0.3906,-0.1036e-3],300,0.01,72.1488)
 
-# load saturation curve:
-df   = pd.read_csv(r'./n-pentane.csv')
+# read csv file containing saturation curve:
+with open('n-pentane.csv', mode='r') as file:
+    csv_reader = csv.DictReader(file, quoting=csv.QUOTE_NONNUMERIC)
+
+    # initialize an empty dictionary for columns
+    df = {header: [] for header in csv_reader.fieldnames}
+
+    # populate the dictionary
+    for row in csv_reader:
+        for key in row:
+            df[key].append(row[key]) 
+
 ssat = df['s_sat']
 tsat = df['T_sat']
 
@@ -38,6 +50,9 @@ smin = smin - 0.1*ds
 smax = smax + 0.1*ds
 tmin = tmin - 0.1*dt
 tmax = tmax + 0.1*dt
+
+# update saturation curve:
+ssat[:] = [x - smin for x in ssat]
 
 def _p_saturation_single(*args, **kwargs):
     
@@ -63,7 +78,7 @@ def _p_saturation_single(*args, **kwargs):
     
     # plot figure
     fig, ax = plt.subplots()
-    ax.plot(ssat-smin,tsat,'k-')
+    ax.plot(ssat,tsat,'k-')
     ax.plot(sl-smin,Tl,'bo')
     ax.plot(sv-smin,Tv,'ro')
     ax.set_xlabel('Entropy, s [J/(kg K)]')
@@ -95,7 +110,7 @@ def _p_saturation_single(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-psat-single")
-    plt.close(fig)
+    #plt.close(fig)
 
 def _evaporation_condensation(*args, **kwargs):
     
@@ -127,7 +142,7 @@ def _evaporation_condensation(*args, **kwargs):
     
     # plot figure
     fig, ax = plt.subplots()
-    ax.plot(ssat-smin,tsat,'k-',linewidth=1)
+    ax.plot(ssat,tsat,'k-',linewidth=1)
     ax.plot(np.array([s1l,s1v])-smin,np.array([Tcond,Tcond]),'go-',linewidth=1,markersize=3)
     ax.plot(np.array([s2l,s2v])-smin,np.array([T2,T2]),'go-',linewidth=1,markersize=3)
     ax.set_xlabel('Entropy, s [J/(kg K)]')
@@ -151,7 +166,7 @@ def _evaporation_condensation(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-tcond-pr")
-    plt.close(fig)
+    #plt.close(fig)
 
 # run function on click:    
 p_saturation_single = create_proxy(_p_saturation_single)

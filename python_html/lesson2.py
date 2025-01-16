@@ -1,10 +1,11 @@
-from js import document
+from pyscript import document
+from pyscript import display
+from js import console
 from pyodide.ffi import create_proxy 
-import thermo_props
-import orc_simulator
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import thermo_props
 
 # initialise figures:
 fig, ax = plt.subplots()
@@ -12,7 +13,7 @@ fig.set_size_inches(4, 4)
 ax.set_position([0.175,0.125,0.80,0.85])
 display(fig,target="plt-sub-super")
 display(fig,target="plt-4-variables")
-plt.close(fig)
+#plt.close(fig)
 
 # fontsize for in-figure text:
 fs = 7
@@ -21,8 +22,18 @@ fs = 7
 fluid = thermo_props.pr_fluid("n-pentane",469.7,3.3675e6,0.2510,
                                [12.9055,0.3906,-0.1036e-3],300,0.01,72.1488)
 
-# load saturation curve:
-df   = pd.read_csv(r'./n-pentane.csv')
+# read csv file containing saturation curve:
+with open('n-pentane.csv', mode='r') as file:
+    csv_reader = csv.DictReader(file, quoting=csv.QUOTE_NONNUMERIC)
+
+    # initialize an empty dictionary for columns
+    df = {header: [] for header in csv_reader.fieldnames}
+
+    # populate the dictionary
+    for row in csv_reader:
+        for key in row:
+            df[key].append(row[key]) 
+
 ssat = df['s_sat']
 tsat = df['T_sat']
 
@@ -37,6 +48,9 @@ smin = smin - 0.1*ds
 smax = smax + 0.1*ds
 tmin = tmin - 0.1*dt
 tmax = tmax + 0.1*dt
+
+# update saturation curve:
+ssat[:] = [x - smin for x in ssat]
     
 def _subcooled_superheated(*args, **kwargs):
     
@@ -79,7 +93,7 @@ def _subcooled_superheated(*args, **kwargs):
     
     # plot:
     fig, ax = plt.subplots()
-    ax.plot(ssat-smin,tsat,'k-',linewidth=1)
+    ax.plot(ssat,tsat,'k-',linewidth=1)
     ax.plot(sl-smin,Tl,'g-',linewidth=1)
     ax.plot(sv-smin,Tv,'g-',linewidth=1)
     ax.plot(np.array([sl[49],sv[0]])-smin,np.array([Tsat,Tsat]),'g-',linewidth=1)
@@ -101,7 +115,7 @@ def _subcooled_superheated(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-sub-super")
-    plt.close(fig)
+    #plt.close(fig)
 
     
 def _four_variables(*args, **kwargs):
@@ -144,7 +158,7 @@ def _four_variables(*args, **kwargs):
     
     # update plot:
     fig, ax = plt.subplots()
-    ax.plot(ssat-smin,tsat,'k-',linewidth=1)
+    ax.plot(ssat,tsat,'k-',linewidth=1)
     ax.plot(np.array([s1,s1l,s1v])-smin,np.array([T1,Tcond,Tcond]),'go-',linewidth=1,markersize=4)
     ax.plot(np.array([s2l,s3v,s3])-smin,np.array([T2l,T3v,T3]),'go-',linewidth=1,markersize=4)
     ax.set_xlabel('Entropy, s [J/(kg K)]')
@@ -162,7 +176,7 @@ def _four_variables(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-4-variables")
-    plt.close(fig)
+    #plt.close(fig)
 
 # run function on click:    
 subcooled_superheated = create_proxy(_subcooled_superheated)

@@ -115,7 +115,7 @@ def HP_state_points(flu,t_evap,dt_sh,pr,dt_sc,dt_ihe,etac):
         satl_hp = None
         
     # run compression process:
-    props[:,1] = compression(flu,props[:,0],1,p2,etac,satv_hp,satl_hp) 
+    props[:,1] = compression(flu,props[:,0],1,p2,etac,satv_hp) 
 
     # properties at outlet of condenser:
     p3 = p2
@@ -168,7 +168,7 @@ def HP_state_points(flu,t_evap,dt_sh,pr,dt_sc,dt_ihe,etac):
 
         # recuperator energy balance (high pressure):
         h3r = h3 - (h1 - h1r)
-        flu.phflash_mass(p3,h3r,0,props[:,4],t1)
+        flu.phflash_mass(p3,h3r,0,props[:,4])
         t3r = flu.fluid.T()
         s3r = flu.fluid.smass()
         d3r = flu.fluid.rhomass()
@@ -189,39 +189,24 @@ def HP_state_points(flu,t_evap,dt_sh,pr,dt_sc,dt_ihe,etac):
 
 ################################################################################
 # run compression process: 
-def compression(flu,props_in,region,p_out,eta,satv,satl):
+def compression(flu,props_in,region,p_out,eta,sat):
 
     # unpack compressor inlet conditions:
     h_in = props_in[2]
     s_in = props_in[3]
-
-    # unpack saturated conditions at outlet pressure:
-    [tsat,dum,hsatl,ssatl,dsatl] = satl
-    [tsat,dum,hsatv,ssatv,dsatv] = satv
     
     # calculate outlet enthalpy after isentropic compression:
-    if (s_in > ssatv):
-        flu.psflash_mass(p_out,s_in,region,satv,satv[0]+50)
-        h_out_s = flu.fluid.hmass()
-    else:
-        x_s = (s_in - ssatl)/(ssatv - ssatl)
-        h_out_s = hsatl + x_s*(hsatv - hsatl)
+    flu.psflash_mass(p_out,s_in,region,sat)
+    h_out_s = flu.fluid.hmass()
 
     # calculate oulet enthalpy after real compression: 
     h_out = h_in + (h_out_s - h_in)/eta
 
     # calculate thermodynamic properties at outlet of compressor:
-    if (h_out > hsatv):
-        flu.phflash_mass(p_out,h_out,region,satv,satv[0]+50)
-        t_out = flu.fluid.T()
-        s_out = flu.fluid.smass()
-        d_out = flu.fluid.rhomass()
-    else:
-        x_s   = (h_out - hsatl)/(hsatv - hsatl)
-        t_out = tsat
-        s_out = ssatl + x_s*(ssatv - ssatl)
-        #v_out = vsatl + x_s*(vsatv - vsatl)
-        d_out = 1/((1/dsatl) + x_s*(1/dsatv - 1/dsatl))
+    flu.phflash_mass(p_out,h_out,region,sat)
+    t_out = flu.fluid.T()
+    s_out = flu.fluid.smass()
+    d_out = flu.fluid.rhomass()
 
     # return properties:
     return np.array([t_out, p_out, h_out, s_out, d_out])
@@ -231,7 +216,6 @@ def compression(flu,props_in,region,p_out,eta,satv,satl):
 def expansion(flu,props_in,region,p_out,eta,satl,satv):
 
     # unpack expander inlet conditions:
-    T_in = props_in[0]
     h_in = props_in[2]
     s_in = props_in[3]
 
@@ -241,7 +225,7 @@ def expansion(flu,props_in,region,p_out,eta,satl,satv):
 
     # calculate outlet enthalpy after isentropic expansion:
     if (s_in > ssatv):
-        flu.psflash_mass(p_out,s_in,region,satv,T_in)
+        flu.psflash_mass(p_out,s_in,region,satv)
         h_out_s = flu.fluid.hmass()
     else:
         x_s = (s_in - ssatl)/(ssatv - ssatl)
@@ -252,7 +236,7 @@ def expansion(flu,props_in,region,p_out,eta,satl,satv):
 
     # calculate thermodynamic properties at outlet of expander:
     if (h_out > hsatv):
-        flu.phflash_mass(p_out,h_out,region,satv,T_in)
+        flu.phflash_mass(p_out,h_out,region,satv)
         t_out = flu.fluid.T()
         s_out = flu.fluid.smass()
         d_out = flu.fluid.rhomass()
@@ -422,7 +406,7 @@ def UA_sizing_recup(
     t_hot[0]   = props_hot[0,1]
     t_hot[n-1] = props_hot[0,0]
     for i in range(1,n-1,1):
-        flu.phflash_mass(props_hot[1,0],h_hot[i],region_hot,sat_hot,t_hot[i-1])
+        flu.phflash_mass(props_hot[1,0],h_hot[i],region_hot,sat_hot)
         t_hot[i] = flu.fluid.hmass()
 
     # compute pinch points:
@@ -567,6 +551,10 @@ def plot_cycle_ph(flu,props,*args):
         df   = args[0]
         psat = df['p_sat']
         hsat = df['h_sat']
+        
+    # saturation curve unit conversion:
+    psat[:] = [x / 1e5 for x in psat]
+    hsat[:] = [x / 1e3 for x in hsat]
 
     # state points for p-h diagram:
     t = props[0,:]
@@ -589,7 +577,7 @@ def plot_cycle_ph(flu,props,*args):
     fig, ax = plt.subplots()
 
     # plot ph diagram:
-    ax.plot(hsat/1e3,psat/1e5,'k-',linewidth=1)
+    ax.plot(hsat,psat,'k-',linewidth=1)
     ax.fill(h/1e3,p/1e5,facecolor='green', alpha=0.5, linewidth=1)
     ax.plot(h/1e3,p/1e5,'g-',linewidth=1)
     ax.plot(h/1e3,p/1e5,'go',markersize=3)
@@ -621,12 +609,15 @@ def plot_cycle_pv(flu,props,*args):
     if ((len(args) == 0) or ((len(args) == 1) and (args[0] is None))): 
         flu.saturation_curve(100)
         psat = flu.psat
-        vsat = 1/flu.dsat
+        dsat = flu.dsat
     else:
         df   = args[0]
         psat = df['p_sat']
         dsat = df['d_sat']
-        vsat = 1/dsat
+        
+    # saturation curve unit conversion:
+    psat[:] = [x / 1e5 for x in psat]
+    vsat = [1 / x for x in dsat]
 
     # state points for p-v diagram:
     t = props[0,:]
@@ -686,11 +677,12 @@ def plot_cycle_pv(flu,props,*args):
     fig, ax = plt.subplots()
     
     # plot pv diagram:
-    ax.plot(vsat,psat/1e5,'k-',linewidth=1)
+    ax.plot(vsat,psat,'k-',linewidth=1)
     ax.fill(v_ts,p_ts/1e5,facecolor='green', alpha=0.5, linewidth=1)
     ax.plot(v_ts,p_ts/1e5,'g-',linewidth=1)
     ax.plot(v,p/1e5,'go',markersize=3)
-    ax.set_xlabel('Specific volume, v [$\mathregular{m^{3}}$/kg]')
+    #ax.set_xlabel('Specific volume, v [$\mathregular{m^{3}}$/kg]')
+    ax.set_xlabel('Specific volume, v [m^3/kg]')
     ax.set_ylabel('Pressure, P [bar]')
     ax.set_xlim((vmin,vmax))
     ax.set_ylim((pmin/1e5,pmax/1e5))

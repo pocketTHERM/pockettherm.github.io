@@ -1,0 +1,17 @@
+{
+  "packages": ["numpy", "matplotlib"],
+  "fetch": [
+    {
+      "files": ["pocketORC.py","pocketHP.py","lesson1.py","lesson2.py","lesson3.py","lesson4.py","lesson5.py","lesson6.py"],
+      "from": "python_html"
+    },
+    {
+      "files": ["thermo_props.py", "orc_simulator.py", "hp_simulator.py"],
+      "from": "python_modules"
+    },
+    {
+      "files": ["n-pentane.csv", "MM.csv", "R1233zd(E).csv"],
+      "from": "fluids"
+    }
+  ]
+}

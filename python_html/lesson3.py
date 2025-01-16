@@ -1,10 +1,11 @@
-from js import document
+from pyscript import document
+from pyscript import display
+from js import console
 from pyodide.ffi import create_proxy 
-import thermo_props
-import orc_simulator
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import thermo_props
 
 # initialise figures:
 fig, ax = plt.subplots()
@@ -12,14 +13,24 @@ fig.set_size_inches(4, 4)
 ax.set_position([0.175,0.125,0.80,0.85])
 display(fig,target="plt-ideal-cycle")
 display(fig,target="plt-real-cycle")
-plt.close(fig)
+#plt.close(fig)
 
 # initialise fluid:
 fluid = thermo_props.pr_fluid("n-pentane",469.7,3.3675e6,0.2510,
                                [12.9055,0.3906,-0.1036e-3],300,0.01,72.1488)
 
-# load saturation curve:
-df   = pd.read_csv(r'./n-pentane.csv')
+# read csv file containing saturation curve:
+with open('n-pentane.csv', mode='r') as file:
+    csv_reader = csv.DictReader(file, quoting=csv.QUOTE_NONNUMERIC)
+
+    # initialize an empty dictionary for columns
+    df = {header: [] for header in csv_reader.fieldnames}
+
+    # populate the dictionary
+    for row in csv_reader:
+        for key in row:
+            df[key].append(row[key]) 
+
 ssat = df['s_sat']
 tsat = df['T_sat']
 
@@ -37,6 +48,9 @@ smin = smin - 0.1*ds
 smax = smax + 0.1*ds
 tmin = tmin - 0.1*dt
 tmax = tmax + 0.1*dt
+
+# update saturation curve:
+ssat[:] = [x - smin for x in ssat]
 
 def _ideal_cycle(*args, **kwargs):
     
@@ -111,7 +125,7 @@ def _ideal_cycle(*args, **kwargs):
 
     # update plot:
     fig, ax = plt.subplots()
-    ax.plot(ssat-smin,tsat,'k-',linewidth=1)
+    ax.plot(ssat,tsat,'k-',linewidth=1)
     ax.plot(np.array([s1,s2,s3,s4])-smin,np.array([T1,T2,T3,T4]),'go',markersize=3)
     ax.fill(s_ts-smin,t_ts,facecolor='g', alpha=0.5, linewidth=1,)
     ax.plot(s_ts-smin,t_ts,'g-',linewidth=1)
@@ -127,7 +141,7 @@ def _ideal_cycle(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-ideal-cycle")
-    plt.close(fig)
+    #plt.close(fig)
 
     
 def _real_cycle(*args, **kwargs):
@@ -215,7 +229,7 @@ def _real_cycle(*args, **kwargs):
 
     # update plot:
     fig, ax = plt.subplots()
-    ax.plot(ssat-smin,tsat,'k-',linewidth=1)
+    ax.plot(ssat,tsat,'k-',linewidth=1)
     ax.plot(np.array([s1,s2,s3,s4])-smin,np.array([T1,T2,T3,T4]),'go',markersize=3)
     ax.fill(s_ts-smin,t_ts,facecolor='g', alpha=0.5, linewidth=1)
     ax.plot(s_ts-smin,t_ts,'g-',linewidth=1)
@@ -236,7 +250,7 @@ def _real_cycle(*args, **kwargs):
     axins.set_ylim(y1, y2)
     axins.set_xticklabels([])
     axins.set_yticklabels([])
-    axins.plot(ssat-smin,tsat,'k-',linewidth=1)
+    axins.plot(ssat,tsat,'k-',linewidth=1)
     axins.plot(np.array([s1,s2,s3,s4])-smin,np.array([T1,T2,T3,T4]),'go')
     axins.fill(s_ts-smin,t_ts,facecolor='g', alpha=0.5, linewidth=1)
     axins.plot(s_ts-smin,t_ts,'g-',linewidth=1)
@@ -246,7 +260,7 @@ def _real_cycle(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-real-cycle")
-    plt.close(fig)
+    #plt.close(fig)
     
     
 # run function on click:    

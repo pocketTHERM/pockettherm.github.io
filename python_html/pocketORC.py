@@ -1,11 +1,12 @@
-from js import document
+from pyscript import document
+from pyscript import display
 from js import console
 from pyodide.ffi import create_proxy 
-import thermo_props
-import orc_simulator
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import thermo_props
+import orc_simulator
 
 # heat exchanger discretisation (not user defined):
 n_hxc = [2,2,2,5,2,2,2,2]
@@ -18,7 +19,7 @@ fig.set_size_inches(4, 4)  # set to float for w and h
 ax.set_position([0.175,0.125,0.80,0.85])
 display(fig,target="single_study_plot")
 plt.tight_layout()
-plt.close(fig)
+#plt.close(fig)
 
 def setup_fluid(fluid_name):
     
@@ -31,17 +32,26 @@ def setup_fluid(fluid_name):
     cp1    = [  33.3490,      12.9055,      64.6367   ]
     cp2    = [  0.2823,       0.3906,       0.6695    ]
     cp3    = [ -0.1523e-3,   -0.1036e-3,   -0.2895e-3 ] 
-
-    # set index and read csv file containing saturation curve:
+        
+    # set index:
     if fluid_name == "R1233zd(E)":
         i  = 0
-        df = pd.read_csv(r'R1233zd(E).csv')
     elif fluid_name == "n-pentane":
         i  = 1
-        df = pd.read_csv(r'n-pentane.csv')
     elif fluid_name == "MM":
         i  = 2
-        df = pd.read_csv(r'MM.csv')
+        
+    # read csv file containing saturation curve:
+    with open(fluid_name + '.csv', mode='r') as file:
+        csv_reader = csv.DictReader(file, quoting=csv.QUOTE_NONNUMERIC)
+    
+        # initialize an empty dictionary for columns
+        df = {header: [] for header in csv_reader.fieldnames}
+    
+        # populate the dictionary
+        for row in csv_reader:
+            for key in row:
+                df[key].append(row[key])        
         
     # setup fluid:
     fluid = thermo_props.pr_fluid(
@@ -132,7 +142,7 @@ def _single_cycle(*args, **kwargs):
     ax.set_position([0.175, 0.125, 0.80, 0.85])
     fig.set_size_inches(4, 4)
     display(fig, target = "single_study_plot")
-    plt.close(fig)
+    #plt.close(fig)
 
     # print Temperature [K]: 
     document.getElementById("pl-1").innerHTML ="{:.2f}".format(props[0][0])

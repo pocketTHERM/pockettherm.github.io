@@ -1,10 +1,12 @@
-from js import document
+from pyscript import document
+from pyscript import display
+from js import console
 from pyodide.ffi import create_proxy 
-import thermo_props
-import orc_simulator
+import csv
 import matplotlib.pyplot as plt
 import numpy as np
-import pandas as pd
+import thermo_props
+import orc_simulator
 
 # initialise figures:
 fig, ax = plt.subplots()
@@ -12,14 +14,24 @@ fig.set_size_inches(4, 4)
 ax.set_position([0.175,0.125,0.80,0.85])
 display(fig,target="plt-pr-supercrit")
 display(fig,target="plt-vapour-quality")
-plt.close(fig)
+#plt.close(fig)
 
 # initialise fluid:
 fluid = thermo_props.pr_fluid("n-pentane",469.7,3.3675e6,0.2510,
                                [12.9055,0.3906,-0.1036e-3],300,0.01,72.1488)
 
-# load saturation curve:
-df   = pd.read_csv(r'./n-pentane.csv')
+# read csv file containing saturation curve:
+with open('n-pentane.csv', mode='r') as file:
+    csv_reader = csv.DictReader(file, quoting=csv.QUOTE_NONNUMERIC)
+
+    # initialize an empty dictionary for columns
+    df = {header: [] for header in csv_reader.fieldnames}
+
+    # populate the dictionary
+    for row in csv_reader:
+        for key in row:
+            df[key].append(row[key]) 
+
 ssat = df['s_sat']
 tsat = df['T_sat']
 
@@ -77,7 +89,7 @@ def _transcritical(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-pr-supercrit")
-    plt.close(fig)
+    #plt.close(fig)
     
 def _two_phase(*args, **kwargs):
     
@@ -103,7 +115,7 @@ def _two_phase(*args, **kwargs):
     ax.set_position([0.175,0.125,0.80,0.85])
     fig.set_size_inches(4, 4)
     display(fig,target="plt-vapour-quality")
-    plt.close(fig)
+    #plt.close(fig)
     
     
 # run function on click:    
